@@ -18,28 +18,18 @@ body:
     required: true
 - type: checkboxes
   attributes:
-    label: This issue occurs when only Valkyrien Skies, addons, and the mod I have specified are installed and no other mods
+    label: This issue occurs when only Crystal, and the mod I have specified are installed and no other mods
     options:
-      - label: I have tested this issue and it occurs with only Valkyrien Skies, addons, and the mod I have specified
+      - label: I have tested this issue and it occurs with only Crystal, and the mod I have specified
 - type: dropdown
   attributes:
     label: Minecraft Version
     description: What Minecraft version does this issue occur on?
     options:
-      - 1.18.2
-      - 1.20.1
+      - 1.21.3
   validations:
     required: true
-- type: dropdown
-  attributes:
-    label: Mod Loader
-    description: What mod loader does this issue occur on?
-    options:
-      - Forge
-      - Fabric
-      - Quilt
-  validations:
-    required: true
+
 - type: textarea
   attributes:
     label: Issue description

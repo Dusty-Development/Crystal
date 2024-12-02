@@ -2,8 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - '1.20.1'
-      - '1.20.1-Experimental'
+      - '1.21.3'
   pull_request:
     types: [ opened, synchronize, reopened ]
 jobs:
@@ -13,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: true # Clone with vs-core submodule
+          submodules: true # Clone with submodule
       - uses: gradle/wrapper-validation-action@v1
 
   build-and-publish:

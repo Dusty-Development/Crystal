@@ -6,7 +6,7 @@ assignees: []
 body:
 - type: checkboxes
   attributes:
-    label: This issue occurs when only Valkyrien Skies and addons are installed and no other mods
+    label: This issue occurs when only Crystal and addons are installed and no other mods
     options:
       - label: I have tested this issue and it occurs when no other mods are installed
         required: true
@@ -16,25 +16,13 @@ body:
     description: What Minecraft version does this issue occur on?
     options:
       - Any
-      - 1.20​.1
-      - 1.18.2
+      - 1.21.3
   validations:
     required: true
 - type: input
   attributes:
-    label: Simplici version
-    description: The version of Simplici ships
-  validations:
-    required: true
-- type: dropdown
-  attributes:
-    label: Mod Loader
-    description: What mod loader does this issue occur on?
-    options:
-      - All
-      - Forge
-      - Fabric
-      - Quilt
+    label: Crystal version
+    description: The version of Crystal
   validations:
     required: true
 - type: textarea
