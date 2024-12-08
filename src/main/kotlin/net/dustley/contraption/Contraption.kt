@@ -2,6 +2,7 @@ package net.dustley.contraption
 
 import net.dustley.Crystal
 import net.dustley.api.math.Transform
+import net.dustley.contraption.piece.ContraptionPiece
 import net.minecraft.nbt.NbtCompound
 import java.util.*
 
@@ -12,6 +13,8 @@ class Contraption(
     val contraptionManager: ContraptionManager
 ) {
 
+
+
     init {
         Crystal.LOGGER.info("Created new contraption at: ${transform.position} with id: $uuid")
     }
@@ -21,6 +24,14 @@ class Contraption(
     }
 
     fun saveData() {
+
+    }
+
+    fun addPiece() : ContraptionPiece {
+        return ContraptionPiece(UUID.randomUUID(), transform, contraptionManager.scrapyard.getOrCreatePlot(), this, contraptionManager)
+    }
+
+    fun removePiece() {
 
     }
 

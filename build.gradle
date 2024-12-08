@@ -31,9 +31,14 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 
 
-	// Physics
-	implementation("com.github.stephengold:jolt-jni-Windows64:0.9.3")
-	runtimeOnly("com.github.stephengold:jolt-jni-Windows64:${project.phys_version}:ReleaseDp")
+	// java bindings
+	implementation("de.fabmax:physx-jni:2.4.2")
+
+	// native libraries - you can add the one matching your system or all
+	runtimeOnly("de.fabmax:physx-jni:${project.phys_version}:natives-windows")
+	runtimeOnly("de.fabmax:physx-jni:${project.phys_version}:natives-linux")
+	runtimeOnly("de.fabmax:physx-jni:${project.phys_version}:natives-macos")
+	runtimeOnly("de.fabmax:physx-jni:${project.phys_version}:natives-macos-arm64")
 
 	// Math
 	implementation "org.joml:joml:${project.joml_version}"
@@ -84,11 +89,7 @@ publishing {
 
 	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		mavenLocal()
-        maven {
-            name = 'Kotlin for Forge'
-            url = 'https://thedarkcolour.github.io/KotlinForForge/'
-        }
+
 	}
 }
 

@@ -1,12 +1,15 @@
 package net.dustley.contraption
 
 import net.dustley.Crystal
+import net.dustley.scrapyard.ScrapyardPlotManager
 import net.minecraft.world.World
 import java.util.*
 
 abstract class ContraptionManager(val world: World) {
 
     abstract val isClientSide:Boolean // Just here to make checking for server or client side easy
+
+    val scrapyard = ScrapyardPlotManager(world)
 
     val contraptions: MutableMap<UUID, Contraption> = mutableMapOf()
 

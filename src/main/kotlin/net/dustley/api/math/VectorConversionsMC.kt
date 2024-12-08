@@ -1,6 +1,5 @@
 package net.dustley.api.math
 
-import com.github.stephengold.joltjni.Vec3
 import net.minecraft.util.math.*
 import org.joml.*
 
@@ -33,20 +32,20 @@ fun Vector3d.set(v: Position) = also {
     z = v.z
 }
 
-fun Vec3i.toDoubles() = Vec3(x.toDouble(), y.toDouble(), z.toDouble())
+fun Vec3i.toDoubles() = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
 
 
 fun Vector3ic.toBlockPos() = BlockPos(x(), y(), z())
-fun Vector3dc.toMinecraft() = Vec3(x(), y(), z())
+fun Vector3dc.toMinecraft() = Vec3d(x(), y(), z())
 
 fun Matrix4d.mul(m: Matrix4fc): Matrix4d = mul(m, this)
 
 fun Vector2ic.toMinecraft() = ChunkPos(x(), y())
 fun ChunkPos.toJOML() = Vector2i().set(this)
 
-fun Vec3.toJOML() = Vector3d().set(this)
+fun Vec3d.toJOML() = Vector3d().set(this)
 
-fun Vector3d.set(v: Vec3) = also {
+fun Vector3d.set(v: Vec3d) = also {
     x = v.x.toDouble()
     y = v.y.toDouble()
     z = v.z.toDouble()
@@ -71,7 +70,7 @@ fun Matrix4dc.transform(v: Vector4f) = v.also {
     )
 }
 
-fun Matrix4dc.transformPosition(v: Vec3): Vec3 {
+fun Matrix4dc.transformPosition(v: Vec3d): Vec3d {
     return transformPosition(v.toJOML()).toMinecraft()
 }
 

@@ -19,6 +19,7 @@ object Crystal : ModInitializer {
 
 		println("Test")
 
+
 		ModItems.registerModItems()
 	}
 
