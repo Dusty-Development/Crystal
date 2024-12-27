@@ -1,7 +1,7 @@
 package net.dustley.mixin.server;
 
-import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.dustley.accessor.ContraptionManagerAccessor;
+import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
 
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin implements ContraptionManagerAccessor {
@@ -38,4 +39,13 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
     }
 
     public ServerContraptionManager getContraptionManager() { return contraptionManager; }
+
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void postTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+        final ServerWorld self = ServerWorld.class.cast(this);
+
+//        self.getChunkManager().chunkLoadingManager.
+    }
+
 }

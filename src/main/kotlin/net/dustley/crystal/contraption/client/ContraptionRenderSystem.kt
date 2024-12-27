@@ -2,14 +2,21 @@ package net.dustley.crystal.contraption.client
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.dustley.crystal.api.contraption.contraptionManager
+import net.dustley.crystal.api.math.toJOML
 import net.dustley.crystal.contraption.Contraption
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.GameRenderer
+import net.minecraft.client.render.RenderLayers
+import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Text
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.ChunkPos
 import net.minecraft.util.math.RotationAxis
+import net.minecraft.util.math.random.Random
 import org.joml.Quaternionf
 
 
@@ -45,15 +52,52 @@ class ContraptionRenderSystem(val world:ClientWorld) {
         stack.multiply(Quaternionf(contraption.transform.rotation))
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
-        //TODO: Implement ship rendering
-
-        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebugText(contraption, context)
+        renderBlocks(contraption, stack, context)
+        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebugText(contraption, stack, context)
 
         stack.pop()
     }
 
-    fun renderDebugText(contraption: Contraption, context: WorldRenderContext) {
+    private fun renderBlocks(contraption: Contraption, stack: MatrixStack, context: WorldRenderContext) {
+        stack.push()
+        val world: ClientWorld = context.world()
+        val consumers: VertexConsumerProvider = context.consumers()!!
+        val client = MinecraftClient.getInstance()
+        val blockRenderManager = client.blockRenderManager
+        val random: Random = Random.create()
 
+        val renderPos = contraption.transform.position
+        val blockPos = BlockPos(renderPos.x.toInt(), renderPos.y.toInt(), renderPos.z.toInt())
+        val chunkPosVec3i = blockPos.toJOML().div(16)
+        val chunkPos = ChunkPos(chunkPosVec3i.x, chunkPosVec3i.z)
+
+        stack.translate((-chunkPos.centerX).toDouble(), 0.0, (-chunkPos.centerZ).toDouble());
+
+        for (xPos in chunkPos.startX..chunkPos.endX) {
+            for (zPos in chunkPos.startZ..chunkPos.endZ) {
+                for (yPos in -64 until -40) {
+                    val blockPosition = BlockPos(xPos, yPos, zPos)
+                    val blockState = world.getBlockState(blockPosition)
+
+                    if(blockState.isAir) break
+
+                    val renderLayer = RenderLayers.getBlockLayer(blockState)
+                    val vertexConsumer = consumers.getBuffer(renderLayer)
+                    val offsetPosition = blockPosition.subtract(blockPos).toCenterPos()
+
+                    stack.push()
+                    stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
+                    blockRenderManager.renderBlock(blockState, blockPosition, world, stack, vertexConsumer, true, random)
+
+                    stack.pop()
+                }
+            }
+        }
+        stack.pop()
+    }
+
+    fun renderDebugText(contraption: Contraption, stack: MatrixStack, context: WorldRenderContext) {
+        stack.push()
         // Render the chunk coordinates as text
         val chunkText: Text = Text.of("UUID: ${contraption.uuid} | Plot: {${contraption.plot.plotPosition.x()}, ${contraption.plot.plotPosition.y()}}")
         val color = 0xFFFFFF // White color
@@ -72,13 +116,15 @@ class ContraptionRenderSystem(val world:ClientWorld) {
             .rotate(RotationAxis.NEGATIVE_Z.rotationDegrees(180f))
             .scale(0.025f)
 
+
         textRenderer.draw(chunkText, xOffset, 0f, color, false, matrix, context.consumers(), TextRenderer.TextLayerType.NORMAL, color, 15)
+        stack.pop()
     }
 
     private fun setupRenderSystem() {
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()
-        RenderSystem.depthMask(false)
+//        RenderSystem.depthMask(false)
         RenderSystem.disableCull()
         RenderSystem.enableDepthTest()
         RenderSystem.setShader { GameRenderer.getPositionColorProgram() }
@@ -88,6 +134,6 @@ class ContraptionRenderSystem(val world:ClientWorld) {
         RenderSystem.enableDepthTest()
         RenderSystem.enableCull()
         RenderSystem.disableBlend()
-        RenderSystem.depthMask(true)
+//        RenderSystem.depthMask(true)
     }
 }

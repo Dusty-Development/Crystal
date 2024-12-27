@@ -21,8 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerChunkLoadingManager.class)
@@ -75,31 +74,25 @@ public abstract class ServerChunkLoadingManagerMixin {
      */
     @Inject(method = "getPlayersWatchingChunk(Lnet/minecraft/util/math/ChunkPos;Z)Ljava/util/List;", at = @At("TAIL"), cancellable = true)
     private void postGetPlayersWatchingChunk(ChunkPos chunkPos, boolean onlyOnWatchDistanceEdge, CallbackInfoReturnable<List<ServerPlayerEntity>> cir) {
-//
-//        final Iterator<IPlayer> playersWatchingShipChunk =
-//                VSGameUtilsKt.getShipObjectWorld(level)
-//                        .getIPlayersWatchingShipChunk(chunkPos.x, chunkPos.z, VSGameUtilsKt.getDimensionId(level));
-//
-//        if (!playersWatchingShipChunk.hasNext()) {
-//            // No players watching this ship chunk, so we don't need to modify anything
-//            return;
-//        }
-//
-//        final List<ServerPlayer> oldReturnValue = cir.getReturnValue();
-//        final Set<ServerPlayer> watchingPlayers = new HashSet<>(oldReturnValue);
-//
-//        playersWatchingShipChunk.forEachRemaining(
-//                iPlayer -> {
-//                    final MinecraftPlayer minecraftPlayer = (MinecraftPlayer) iPlayer;
-//                    final ServerPlayer playerEntity =
-//                            (ServerPlayer) minecraftPlayer.getPlayerEntityReference().get();
-//                    if (playerEntity != null) {
-//                        watchingPlayers.add(playerEntity);
-//                    }
-//                }
-//        );
-//
-//        cir.setReturnValue(new ArrayList<>(watchingPlayers));
+
+        final Iterator<ServerPlayerEntity> playersWatchingShipChunk = world.getPlayers().iterator();
+        if (!playersWatchingShipChunk.hasNext()) {
+            // No players watching this ship chunk, so we don't need to modify anything
+            return;
+        }
+
+        final List<ServerPlayerEntity> oldReturnValue = cir.getReturnValue();
+        final Set<ServerPlayerEntity> watchingPlayers = new HashSet<>(oldReturnValue);
+
+        playersWatchingShipChunk.forEachRemaining(
+                player -> {
+                    if (player != null) {
+                        watchingPlayers.add(player);
+                    }
+                }
+        );
+
+        cir.setReturnValue(new ArrayList<>(watchingPlayers));
     }
 
 }

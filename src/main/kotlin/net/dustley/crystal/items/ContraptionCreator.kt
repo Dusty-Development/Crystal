@@ -18,14 +18,18 @@ class ContraptionCreator : Item(Settings().maxCount(1)) {
     override fun useOnBlock(context: ItemUsageContext): ActionResult {
 
         val world = context.world
-        val transform = Transform(Vector3d(context.hitPos.x, context.hitPos.y, context.hitPos.z), 1.0, Quaterniond())
+        val transform = Transform(Vector3d(context.hitPos.x, context.hitPos.y, context.hitPos.z), 1.0, Quaterniond().rotationY(0.1))
 
         if(world is ServerWorld) {
             context.player?.sendMessage(Text.literal("Creating ship!"))
 
             val contraption = world.contraptionManager().createAndAddContraption(transform)
 
-            world.setBlockState(BlockPos.ofFloored(contraption.plot.centerPos.toMinecraft()), Blocks.GOLD_BLOCK.defaultState)
+            var pos = contraption.plot.centerPos.toMinecraft()
+            pos = pos.multiply(1.0,0.0,1.0)
+            pos.add(0.0,5.0,0.0)
+
+            world.setBlockState(BlockPos.ofFloored(pos), Blocks.GOLD_BLOCK.defaultState)
         }
 
         return super.useOnBlock(context)
