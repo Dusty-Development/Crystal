@@ -26,14 +26,6 @@ abstract class Contraption(
 
     }
 
-    fun addMultiblockPiece() {
-
-    }
-
-    fun removePiece() {
-
-    }
-
     companion object {
 
 

@@ -15,10 +15,10 @@ private val condition: (Int, Vector2i) -> Boolean
     private var currentStepInDirection = 0
 
     private val directions = listOf(
-        Vector2i(0, 1),  // right
-        Vector2i(1, 0),  // down
-        Vector2i(0, -1), // left
-        Vector2i(-1, 0)  // up
+        Vector2i(0, 1),
+        Vector2i(1, 0),
+        Vector2i(0, -1),
+        Vector2i(-1, 0)
     )
 
     init {
@@ -27,10 +27,10 @@ private val condition: (Int, Vector2i) -> Boolean
         stepSize = 2 * layer
         stepChangeCount = 2 * layer - 1
         directionIndex = when {
-            startPosition.y == layer -> 0 // Right
-            startPosition.x == layer -> 1 // Down
-            startPosition.y == -layer -> 2 // Left
-            else -> 3 // Up
+            startPosition.y == layer -> 1
+            startPosition.x == layer -> 0
+            startPosition.y == -layer -> 3
+            else -> 2
         }
         currentStepInDirection = when (directionIndex) {
             0 -> layer + startPosition.x
@@ -90,39 +90,39 @@ private val condition: (Int, Vector2i) -> Boolean
 
 // TESTING
 fun main() {
-    // Iterator from start to end position
-    println("iterator1")
-    val iterator1 = SpiralIterator.fromStartToEnd(Vector2i(0, 0), Vector2i(2, 2))
-    var iterator1Steps = 0
-    while (iterator1.hasNext() && iterator1Steps <= 1024) {
-        println(iterator1.next())
-        iterator1Steps++
-    }
-
-    // Iterator with start position and max count
-    println("iterator2")
-    val iterator2 = SpiralIterator.fromStartWithMaxCount(Vector2i(0, 0), 10)
-    var iterator2Steps = 0
-    while (iterator2.hasNext() && iterator2Steps <= 1024) {
-        println(iterator2.next())
-        iterator2Steps++
-    }
+//    // Iterator from start to end position
+//    println("iterator1")
+//    val iterator1 = SpiralIterator.fromStartToEnd(Vector2i(2, 2), Vector2i(5, 5))
+//    var iterator1Steps = 0
+//    while (iterator1.hasNext() && iterator1Steps <= 1024) {
+//        println(iterator1.next())
+//        iterator1Steps++
+//    }
+//
+//    // Iterator with start position and max count
+//    println("iterator2")
+//    val iterator2 = SpiralIterator.fromStartWithMaxCount(Vector2i(0, 0), 10)
+//    var iterator2Steps = 0
+//    while (iterator2.hasNext() && iterator2Steps <= 1024) {
+//        println(iterator2.next())
+//        iterator2Steps++
+//    }
 
     // Iterator with start position only (infinite)
     println("iterator3")
-    val iterator3 = SpiralIterator.fromStartOnly(Vector2i(1, 1))
-    repeat(15) {
+    val iterator3 = SpiralIterator.fromStartOnly(Vector2i(2, 2))
+    repeat(32) {
         println(iterator3.next())
     }
-
-    // Iterator with custom condition
-    println("iterator4")
-    var iterator4Steps = 0
-    val iterator4 = SpiralIterator.fromStartWithCondition(Vector2i(0, 0)) { pos ->
-        pos.x >= 0 && pos.y >= 0 && pos.x + pos.y <= 4
-    }
-    while (iterator4.hasNext() && iterator4Steps <= 1024) {
-        println(iterator4.next())
-        iterator4Steps++
-    }
+//
+//    // Iterator with custom condition
+//    println("iterator4")
+//    var iterator4Steps = 0
+//    val iterator4 = SpiralIterator.fromStartWithCondition(Vector2i(0, 0)) { pos ->
+//        pos.x >= 0 && pos.y >= 0 && pos.x + pos.y <= 4
+//    }
+//    while (iterator4.hasNext() && iterator4Steps <= 1024) {
+//        println(iterator4.next())
+//        iterator4Steps++
+//    }
 }

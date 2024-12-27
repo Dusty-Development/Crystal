@@ -1,5 +1,6 @@
 package net.dustley.crystal.contraption.server
 
+import net.dustley.crystal.Crystal
 import net.dustley.crystal.api.math.Transform
 import net.dustley.crystal.contraption.Contraption
 import net.dustley.crystal.contraption.ContraptionManager
@@ -31,7 +32,7 @@ class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManage
             )
         }
 
-        println("CREATED SERVER CONTRAPTION WITH COUNT: ${contraptions.size}")
+        Crystal.LOGGER.info("CREATED SERVER CONTRAPTION WITH COUNT: ${contraptions.size}")
 
         return contraption
     }
