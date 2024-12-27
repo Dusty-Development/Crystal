@@ -1,11 +1,9 @@
 package net.dustley.crystal.contraption.client
 
-import com.mojang.blaze3d.systems.RenderSystem
 import net.dustley.crystal.api.contraption.contraptionManager
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.render.GameRenderer
 import net.minecraft.client.render.RenderLayers
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
@@ -28,8 +26,6 @@ class ContraptionRenderSystem(val world:ClientWorld) {
         val stack = context.matrixStack() ?: return
         stack.push()
 
-        setupRenderSystem()
-
         val cameraPos = context.camera().pos
         stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
 
@@ -39,7 +35,6 @@ class ContraptionRenderSystem(val world:ClientWorld) {
             contraption.render(context)
         }
 
-        resetRenderSystem()
         stack.pop()
     }
 
@@ -241,19 +236,4 @@ class ContraptionRenderSystem(val world:ClientWorld) {
         stack.pop()
     }
 
-    private fun setupRenderSystem() {
-        RenderSystem.enableBlend()
-        RenderSystem.defaultBlendFunc()
-//        RenderSystem.depthMask(false)
-        RenderSystem.disableCull()
-        RenderSystem.enableDepthTest()
-        RenderSystem.setShader { GameRenderer.getPositionColorProgram() }
-    }
-
-    private fun resetRenderSystem() {
-        RenderSystem.enableDepthTest()
-        RenderSystem.enableCull()
-        RenderSystem.disableBlend()
-//        RenderSystem.depthMask(true)
-    }
 }

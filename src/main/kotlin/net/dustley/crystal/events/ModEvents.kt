@@ -12,7 +12,7 @@ object ModEvents {
 
         // Renderer
         WorldRenderEvents.AFTER_TRANSLUCENT.register(WorldRenderEvents.AfterTranslucent { context ->
-            context.world().contraptionManager().renderSystem.updateAndRender(0.05, context)
+            context.world().contraptionManager().renderSystem.updateAndRender(context.camera().lastTickDelta.toDouble(), context)
         })
     }
 }
