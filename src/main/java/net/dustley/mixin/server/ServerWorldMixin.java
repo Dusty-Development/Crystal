@@ -1,7 +1,7 @@
 package net.dustley.mixin.server;
 
-import net.dustley.contraption.server.ServerContraptionManager;
-import net.dustley.acessor.ContraptionManagerAccessor;
+import net.dustley.crystal.contraption.server.ServerContraptionManager;
+import net.dustley.accessor.ContraptionManagerAccessor;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;

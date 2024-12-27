@@ -17,13 +17,19 @@
 	"entrypoints": {
 		"main": [
 			{
-				"value": "net.dustley.Crystal",
+				"value": "net.dustley.crystal.Crystal",
 				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"adapter": "kotlin",
+				"value": "net.dustley.crystal.CrystalClient"
 			}
 		],
 		"fabric-datagen": [
 			{
-				"value": "net.dustley.CrystalDataGenerator",
+				"value": "net.dustley.crystal.CrystalDataGenerator",
 				"adapter": "kotlin"
 			}
 		]

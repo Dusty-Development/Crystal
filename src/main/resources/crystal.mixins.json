@@ -7,7 +7,9 @@
     "server.ServerWorldMixin"
   ],
   "client": [
-    "client.ClientWorldMixin"
+    "client.ClientWorldMixin",
+    "client.GameRendererMixin",
+    "client.WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

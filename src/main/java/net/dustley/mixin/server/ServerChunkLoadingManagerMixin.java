@@ -1,12 +1,10 @@
 package net.dustley.mixin.server;
 
-import net.dustley.api.contraption.ContraptionManagerAccessorKt;
-import net.dustley.contraption.ContraptionManager;
-import net.dustley.contraption.piece.ContraptionPiece;
-import net.dustley.scrapyard.ScrapyardPlot;
-import net.dustley.scrapyard.ScrapyardPlotManager;
+import net.dustley.crystal.api.contraption.ContraptionManagerAccessorKt;
+import net.dustley.crystal.contraption.ContraptionManager;
+import net.dustley.crystal.scrapyard.ScrapyardPlot;
+import net.dustley.crystal.scrapyard.ScrapyardPlotManager;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerChunkLoadingManager;
@@ -52,7 +50,7 @@ public abstract class ServerChunkLoadingManagerMixin {
             if (nbtCompound.isEmpty()) {
                 final ContraptionManager contraptionManager = ContraptionManagerAccessorKt.contraptionManager(world);
                 final ScrapyardPlotManager scrapyardPlotManager = contraptionManager.getScrapyard();
-                final ScrapyardPlot plot = scrapyardPlotManager.getPlot(chunkPos);
+                final ScrapyardPlot plot = scrapyardPlotManager.getPlot(chunkPos, false);
 
                 // If its in a ship and it shouldn't generate chunks OR if there is no ship but its happening in the shipyard
                 if (plot == null && scrapyardPlotManager.isChunkInScrapyard(chunkPos)) {
@@ -72,7 +70,8 @@ public abstract class ServerChunkLoadingManagerMixin {
     /**
      * Force the game send chunk update packets to players watching ship chunks.
      *
-     * @author Tri0de
+     * <p> (thanks to Tri0de for creating the original)
+     * @author Dustley
      */
     @Inject(method = "getPlayersWatchingChunk(Lnet/minecraft/util/math/ChunkPos;Z)Ljava/util/List;", at = @At("TAIL"), cancellable = true)
     private void postGetPlayersWatchingChunk(ChunkPos chunkPos, boolean onlyOnWatchDistanceEdge, CallbackInfoReturnable<List<ServerPlayerEntity>> cir) {
