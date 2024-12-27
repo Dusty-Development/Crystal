@@ -15,20 +15,61 @@ abstract class ContraptionManager(val world: World) {
 
     val contraptions: MutableMap<UUID, Contraption> = mutableMapOf()
 
-    // Init
+    // GAME EVENTS \\
     init {
         Crystal.LOGGER.info("Created Contraption Manager for world: $world")
         loadContraptions()
     }
 
-    // Contraption
+    /**
+     * Runs when the world closes
+     */
+    fun unload() {
+        saveContraptions()
 
+        Crystal.LOGGER.info("UnLoaded ContraptionManager for world: $world")
+    }
+
+    /**
+     * Runs every game tick
+     */
+    fun tick() {
+
+    }
+
+    /**
+     * Runs every physics tick
+     */
+    fun physTick() {
+
+    }
+
+    // CONTRAPTIONS \\
+
+    /**
+     * Adds a created contraption to the manager
+     */
     fun addContraption(id: UUID, contraption: Contraption) = contraptions.put(id, contraption)
+
+    /**
+     * Removes a created contraption from the manager
+     */
     fun removeContraption(id: UUID) = contraptions.remove(id)
+
+    /**
+     * Gets a contraption from its id
+     */
     fun getContraption(id: UUID): Contraption? = contraptions[id]
 
-    // DataManager
+    /**
+     * Gets the contraption that's controlling a block position
+     */
+    fun getContraptionManagingPos(blockPos: BlockPos) : Contraption? {
+        val scrapyardPlot = scrapyard.getPlot(ChunkPos(blockPos))
+        return scrapyardPlot?.controllingContraptionPart
+    }
 
+    // DATA MANAGEMENT \\
     fun saveContraptions() {
 //        val data = NbtCompound()
 //        contraptions.forEach { (id, contraption) ->
@@ -47,17 +88,6 @@ abstract class ContraptionManager(val world: World) {
 //            val contraption = Contraption.fromNbt(savedData.data.getCompound(key))
 //            contraptions[id] = contraption
 //        }
-    }
-
-    fun getContraptionManagingPos(blockPos: BlockPos) : Contraption? {
-        val scrapyardPlot = scrapyard.getPlot(ChunkPos(blockPos))
-        return scrapyardPlot?.controllingContraptionPart
-    }
-
-    fun unload() {
-        saveContraptions()
-
-        Crystal.LOGGER.info("UnLoaded ContraptionManager for world: $world")
     }
 
 }

@@ -16,9 +16,12 @@ import java.util.*
 class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManager(serverWorld as World) {
     override val isClientSide: Boolean = false
 
-    // Calling on client will result in nothing done,
-    // ships are only to be created on the server.
-    // This is to avoid issues when assigning a id.
+    /**
+     * Creates a new contraption on the server, and sends it to clients
+     *
+     * Calling on client will result in nothing done, ships are only to be created on the server.
+     * This is to avoid issues when assigning a id.
+     */
     fun createAndAddContraption(transform: Transform): Contraption {
         val id: UUID = UUID.randomUUID()
         val plot = scrapyard.createPlot()

@@ -35,11 +35,11 @@ class ScrapyardPlot(
         }
 
         // AABB generation
-        val minBlock = plotToBlockPos(Vector2i(plotPosition)).add(0,world.bottomY,0)
-        val maxBlock = plotToBlockPos(Vector2i(plotPosition).add(1,1)).add(-1,world.topY,-1)
-        scrapyardAABB = Box.enclosing(minBlock, maxBlock)
+        val minScrapyardBlock = plotToBlockPos(Vector2i(plotPosition)).add(0,world.bottomY,0)
+        val maxScrapyardBlock = plotToBlockPos(Vector2i(plotPosition).add(1,1)).add(-1,world.topY,-1)
+        scrapyardAABB = Box.enclosing(minScrapyardBlock, maxScrapyardBlock)
 
-        Crystal.LOGGER.info("Created plot from blocks ($minBlock) to ($maxBlock)")
+        Crystal.LOGGER.info("Created plot from blocks ($minScrapyardBlock) to ($maxScrapyardBlock)")
 
         // Center positions
         centerChunkPos = plotToChunkPos(Vector2i(plotPosition)).toJOML().add(halfSideSize, halfSideSize).toChunkPos()

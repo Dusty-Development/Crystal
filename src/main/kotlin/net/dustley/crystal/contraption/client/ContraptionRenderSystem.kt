@@ -2,8 +2,6 @@ package net.dustley.crystal.contraption.client
 
 import com.mojang.blaze3d.systems.RenderSystem
 import net.dustley.crystal.api.contraption.contraptionManager
-import net.dustley.crystal.api.math.toJOML
-import net.dustley.crystal.contraption.Contraption
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
@@ -14,10 +12,10 @@ import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkPos
 import net.minecraft.util.math.RotationAxis
 import net.minecraft.util.math.random.Random
 import org.joml.Quaternionf
+import org.joml.Vector2i
 
 
 //https://github.com/ValkyrienSkies/Valkyrien-Skies-2/blob/1.18.x/main/common/src/main/java/org/valkyrienskies/mod/mixin/client/renderer/MixinGameRenderer.java
@@ -28,75 +26,198 @@ class ContraptionRenderSystem(val world:ClientWorld) {
 
     fun updateAndRender(deltaTime: Double, context: WorldRenderContext) {
         val stack = context.matrixStack() ?: return
+        stack.push()
 
         setupRenderSystem()
 
-        val pos = context.camera().pos
-        stack.translate(-pos.x, -pos.y, -pos.z)
+        val cameraPos = context.camera().pos
+        stack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z)
 
         world.contraptionManager().contraptions.forEach { uuid, contraption ->
+            (contraption as ClientContraption)
             renderContraption(contraption, context)
+            contraption.render(context)
         }
 
-        stack.translate(pos.x, pos.y, pos.z)
-
         resetRenderSystem()
+        stack.pop()
     }
 
-    private fun renderContraption(contraption: Contraption, context: WorldRenderContext) {
+    private fun renderContraption(contraption: ClientContraption, context: WorldRenderContext) {
         val stack = context.matrixStack() ?: return
         stack.push()
 
         val position = contraption.transform.position
         stack.translate(position.x, position.y, position.z)
         stack.multiply(Quaternionf(contraption.transform.rotation))
+
+        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
+        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MinecraftClient.getInstance().player!!.age / 3f))
+        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player!!.age / 1.5f))
+
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
-        renderBlocks(contraption, stack, context)
+        renderChunks(contraption, stack, context)
         if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebugText(contraption, stack, context)
 
         stack.pop()
     }
 
-    private fun renderBlocks(contraption: Contraption, stack: MatrixStack, context: WorldRenderContext) {
-        stack.push()
+    private fun renderChunks(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
+
         val world: ClientWorld = context.world()
         val consumers: VertexConsumerProvider = context.consumers()!!
         val client = MinecraftClient.getInstance()
         val blockRenderManager = client.blockRenderManager
         val random: Random = Random.create()
 
-        val renderPos = contraption.transform.position
-        val blockPos = BlockPos(renderPos.x.toInt(), renderPos.y.toInt(), renderPos.z.toInt())
-        val chunkPosVec3i = blockPos.toJOML().div(16)
-        val chunkPos = ChunkPos(chunkPosVec3i.x, chunkPosVec3i.z)
+        // For now, we make a plot at 0,0 so that testing is easy
+        val plot = world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
+        val plotCenterBlockPos = BlockPos(plot.centerPos.x.toInt(), plot.centerPos.y.toInt(), plot.centerPos.z.toInt())
 
-        stack.translate((-chunkPos.centerX).toDouble(), 0.0, (-chunkPos.centerZ).toDouble());
+        stack.push() // Push into the plot
 
-        for (xPos in chunkPos.startX..chunkPos.endX) {
-            for (zPos in chunkPos.startZ..chunkPos.endZ) {
-                for (yPos in -64 until -40) {
-                    val blockPosition = BlockPos(xPos, yPos, zPos)
-                    val blockState = world.getBlockState(blockPosition)
+        // Loop over the chunks and render if necessary
+        plot.controlledChunkPositions.forEach { chunkPos ->
+            val chunk = world.getChunk(chunkPos.x, chunkPos.z)
+            if(chunk.isEmpty) return@forEach // Cancel if chunk is empty
 
-                    if(blockState.isAir) break
+            stack.push() // Push into the chunk
 
-                    val renderLayer = RenderLayers.getBlockLayer(blockState)
-                    val vertexConsumer = consumers.getBuffer(renderLayer)
-                    val offsetPosition = blockPosition.subtract(blockPos).toCenterPos()
+            stack.translate(0.0, (world.bottomY + world.topY) * 0.5, 0.0);
 
-                    stack.push()
-                    stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
-                    blockRenderManager.renderBlock(blockState, blockPosition, world, stack, vertexConsumer, true, random)
+            stack.push() // Push into the Section
 
-                    stack.pop()
+            val sectionYBottom = world.bottomY
+            val sectionYTop = world.topY
+
+            val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
+            val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
+
+            for (xPos in minBlockPos.x..maxBlockPos.x) {
+                for (zPos in minBlockPos.z..maxBlockPos.z) {
+                    for (yPos in minBlockPos.y..maxBlockPos.y) {
+                        val blockPos = BlockPos(xPos, yPos, zPos) // The block in world space (the very large number one)
+                        val blockState = world.getBlockState(blockPos)
+                        val fluidState = world.getFluidState(blockPos)
+                        if(!blockState.isAir) {
+
+                            val renderLayer = RenderLayers.getBlockLayer(blockState)
+                            val vertexConsumer = consumers.getBuffer(renderLayer)
+                            val offsetPosition = blockPos.subtract(plotCenterBlockPos).toCenterPos()
+
+                            stack.push() // Push into the block
+
+                            stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
+                            if (fluidState.isEmpty) blockRenderManager.renderBlock(
+                                blockState,
+                                blockPos,
+                                world,
+                                stack,
+                                vertexConsumer,
+                                true,
+                                random
+                            )
+                            blockRenderManager.renderDamage(blockState, blockPos, world, stack, vertexConsumer)
+//                        if(world.getBlockEntity(blockPos) != null) blockRenderManager.renderBlockAsEntity(blockState, stack, consumers, world.getLightLevel(blockPos), 0)
+//                        else
+//                            blockRenderManager.renderFluid(blockPos, world, vertexConsumer, blockState, fluidState)
+
+                            stack.pop() // Pop out of the block
+                        }
+                    }
                 }
             }
+
+            stack.pop() // Pop out of the section
+            stack.pop() // Pop out of the chunk
         }
-        stack.pop()
+        stack.pop() // Pop out of the plot
     }
 
-    fun renderDebugText(contraption: Contraption, stack: MatrixStack, context: WorldRenderContext) {
+//            // Do some section math so that we don't need to render as many blocks
+//            for (sectionIndex in chunk.sectionArray.indices) { // chunk.sectionArray.indices
+//                val section = chunk.getSection(sectionIndex)
+//
+//                if(section.isEmpty) break // Cancel if the vertical slice is empty
+//
+//                stack.push() // Push into the Section
+//
+//                val sectionYBottom = chunk.bottomY + (sectionIndex * 16)
+//                val sectionYTop = sectionYBottom + 16
+//
+//                val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
+//                val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
+//
+//                for (xPos in minBlockPos.x..maxBlockPos.x) {
+//                    for (zPos in minBlockPos.z..maxBlockPos.z) {
+//                        for (yPos in minBlockPos.y..maxBlockPos.y) {
+//
+//                            val blockPos = BlockPos(xPos, yPos, zPos) // The block in world space (the very large number one)
+//                            val blockState = world.getBlockState(blockPos)
+//
+//                            if(blockState.isAir) break // Skip air blocks
+//
+//                            val renderLayer = RenderLayers.getBlockLayer(blockState)
+//                            val vertexConsumer = consumers.getBuffer(renderLayer)
+//                            val offsetPosition = blockPos.subtract(plotCenterBlockPos).toCenterPos()
+//
+//                            stack.push() // Push into the block
+//
+//                            stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
+//                            blockRenderManager.renderBlock(blockState, blockPos, world, stack, vertexConsumer, true, random)
+//
+//                            stack.pop() // Pop out of the block
+//
+//                        }
+//                    }
+//                }
+//                stack.pop() // Pop out of the section
+//            }
+
+//    private fun afterSetup(worldRenderContext: WorldRenderContext) {
+//        val world = worldRenderContext.world()
+//        val consumers = worldRenderContext.consumers()
+//        val client = MinecraftClient.getInstance()
+//        val blockRenderManager = client.blockRenderManager
+//        val random = Random.create()
+//        val matrixStack = MatrixStack()
+//
+//        matrixStack.push()
+//
+//        val camera = worldRenderContext.camera()
+//        matrixStack.translate(camera.pos.negate())
+//
+//        val blockPos = BlockPos(0, -55, 0)
+//        val chunkPos = ChunkPos.fromRegion(blockPos.x, blockPos.z)
+//
+//        val vec3dWithView = Vec3d(blockPos)
+//        matrixStack.translate(vec3dWithView)
+//        matrixStack.translate(0f, 1f, 0f)
+//        matrixStack.translate(0.0, MathHelper.sin(client.player!!.age / 10f) * 0.2, 0.0)
+//        matrixStack.scale(0.2f, 0.2f, 0.2f)
+//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(client.player!!.age / 4f))
+//        matrixStack.translate(-chunkPos.centerX.toFloat(), 0f, -chunkPos.centerZ.toFloat())
+//
+//        for (xPos in chunkPos.startX..chunkPos.endX) {
+//            for (zPos in chunkPos.startZ..chunkPos.endZ) {
+////                for (int yPos = -64; yPos < 319; yPos++) {
+//                for (yPos in -64 until -40) {
+//                    val blockPos1 = BlockPos(xPos, yPos, zPos)
+//                    val blockState = world.getBlockState(blockPos1)
+//                    val renderLayer = RenderLayers.getBlockLayer(blockState)
+//                    val buffer = consumers!!.getBuffer(renderLayer)
+//                    val vec3d = Vec3d(blockPos1.subtract(blockPos))
+//                    matrixStack.push()
+//                    matrixStack.translate(vec3d)
+//                    blockRenderManager.renderBlock(blockState, blockPos1, world, matrixStack, buffer, true, random)
+//                    matrixStack.pop()
+//                }
+//            }
+//        }
+//    }
+
+    fun renderDebugText(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
         stack.push()
         // Render the chunk coordinates as text
         val chunkText: Text = Text.of("UUID: ${contraption.uuid} | Plot: {${contraption.plot.plotPosition.x()}, ${contraption.plot.plotPosition.y()}}")
@@ -110,7 +231,6 @@ class ContraptionRenderSystem(val world:ClientWorld) {
 
         val matrix = contraption.transform.getMatrix4f()
             .translate(-camPos.x.toFloat(), -camPos.y.toFloat(), -camPos.z.toFloat())
-            .translate(0f, 1f, 0f)
             .rotate(RotationAxis.NEGATIVE_Y.rotationDegrees(context.camera().yaw))
             .rotate(RotationAxis.POSITIVE_X.rotationDegrees(context.camera().pitch))
             .rotate(RotationAxis.NEGATIVE_Z.rotationDegrees(180f))

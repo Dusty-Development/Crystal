@@ -17,24 +17,22 @@ class ScrapyardPlotManager (
     /**
      * Returns the plot controlling a chunk.
      *
-     * you can set "createIfNull" to "true" if you would like to create a plot at that location, and one could not be found,
-     * but it's better to use getOrCreate plot instead
+     * you can set "createIfNull" to "true" if you would like to create a plot at that location, and one could not be found
      */
     fun getPlot(chunkPos: ChunkPos, createIfNull:Boolean = false): ScrapyardPlot? {
         val plot = plots[getPlotPosition(chunkPos)]
-        if(createIfNull && plot == null) return createPlot()
+        if(createIfNull && plot == null) return createPlot(getPlotPosition(chunkPos))
         return plot
     }
 
     /**
      * Returns the plot.
      *
-     * you can set "createIfNull" to "true" if you would like to create a plot at that location, and one could not be found,
-     * but it's better to use getOrCreate plot instead
+     * you can set "createIfNull" to "true" if you would like to create a plot at that location, and one could not be found
      */
     fun getPlot(position: Vector2i, createIfNull:Boolean = false): ScrapyardPlot? {
         val plot = plots[position]
-        if(createIfNull && plot == null) return createPlot()
+        if(createIfNull && plot == null) return createPlot(position)
         return plot
     }
 
@@ -92,7 +90,7 @@ class ScrapyardPlotManager (
 
     companion object {
         const val CHUNK_SIZE = 16 // blocks per chunk
-        const val PLOT_SIZE: Int = 64 // must a f(x) = 2^x
+        const val PLOT_SIZE: Int = 2 // must a f(x) = 2^x
 
         /**
          * Returns the plot position from a chunk position.

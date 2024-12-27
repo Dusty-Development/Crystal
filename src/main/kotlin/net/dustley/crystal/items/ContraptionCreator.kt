@@ -25,9 +25,7 @@ class ContraptionCreator : Item(Settings().maxCount(1)) {
 
             val contraption = world.contraptionManager().createAndAddContraption(transform)
 
-            var pos = contraption.plot.centerPos.toMinecraft()
-            pos = pos.multiply(1.0,0.0,1.0)
-            pos.add(0.0,5.0,0.0)
+            val pos = contraption.plot.centerPos.toMinecraft()
 
             world.setBlockState(BlockPos.ofFloored(pos), Blocks.GOLD_BLOCK.defaultState)
         }
