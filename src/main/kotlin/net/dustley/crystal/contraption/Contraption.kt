@@ -21,7 +21,7 @@ abstract class Contraption(
      * Runs every game tick
      */
     fun tick() {
-        transform = contraptionManager.handler.fetch(uuid)
+
     }
 
     /**

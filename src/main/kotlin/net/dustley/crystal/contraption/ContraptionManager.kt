@@ -39,25 +39,21 @@ abstract class ContraptionManager(val world: World) {
      * Runs every game tick
      */
     fun tick() {
-        for (contraption: Contraption in contraptions.values) {
-            contraption.tick()
-        }
+
     }
 
     /**
      * Runs every physics tick
      */
-    fun physTick() {
-        handler.tick(1/60f)
-    }
+    fun physTick(double: Double) {
 
+    }
     /**
      * Sets up the physics of a new contraption
      */
-    fun setupContraptionPhys(contraption: Contraption) {
-        val shape: PxShape = handler.createBox()
-        handler.createActor(contraption.uuid, contraption.transform, shape)
-    }
+//    open fun setupContraptionPhys(contraption: Contraption) {
+//
+//    }
 
     fun addContraption(id: UUID, contraption: Contraption) = contraptions.put(id, contraption)
 

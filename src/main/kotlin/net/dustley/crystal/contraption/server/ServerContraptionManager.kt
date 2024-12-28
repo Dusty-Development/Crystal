@@ -29,7 +29,7 @@ class ServerContraptionManager(serverWorld: ServerWorld) : ContraptionManager(se
 
         val contraption = ServerContraption(id, transform, plot, this)
 
-        this.setupContraptionPhys(contraption)
+        //this.setupContraptionPhys(contraption)
 
         addContraption(id, contraption)
 

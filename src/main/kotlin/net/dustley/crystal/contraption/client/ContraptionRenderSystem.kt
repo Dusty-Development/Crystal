@@ -47,9 +47,9 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.translate(position.x, position.y, position.z)
         stack.multiply(Quaternionf(transform.rotation))
 
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
-        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MinecraftClient.getInstance().player!!.age / 3f))
-        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player!!.age / 1.5f))
+//        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
+//        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MinecraftClient.getInstance().player!!.age / 3f))
+//        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player!!.age / 1.5f))
 
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
@@ -84,8 +84,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
             stack.push() // Push into the Section
 
-            val sectionYBottom = world.bottomY
-            val sectionYTop = world.topY
+            val sectionYBottom = -10
+            val sectionYTop = 10
 
             val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
             val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
