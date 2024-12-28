@@ -8,8 +8,7 @@ import org.joml.Vector2i
 import kotlin.math.abs
 
 class ScrapyardPlotManager (
-    private val world: World,
-    private val voidDistance: Int = 28672000
+    private val world: World
 ) {
     private val plots: HashMap<Vector2i, ScrapyardPlot> = hashMapOf()
 
@@ -58,7 +57,7 @@ class ScrapyardPlotManager (
      */
     fun createPlot(): ScrapyardPlot {
         // Start at the edge of the void boundary
-        val chunkPos = ChunkPos((voidDistance / CHUNK_SIZE), (voidDistance / CHUNK_SIZE))
+        val chunkPos = ChunkPos((VOID_DIST / CHUNK_SIZE), (VOID_DIST / CHUNK_SIZE))
         val startPos = getPlotPosition(chunkPos)
 
         // Iterator with custom condition
@@ -74,23 +73,26 @@ class ScrapyardPlotManager (
     }
 
 
-    /**
-     * Returns true if a chunk is in the scrapyard
-     */
-    fun isChunkInScrapyard(chunkPos: ChunkPos):Boolean {
-        return abs(chunkPos.x) >= voidDistance / CHUNK_SIZE || abs(chunkPos.z) >= voidDistance / CHUNK_SIZE
-    }
 
-    /**
-     * Returns true if a plot is in the scrapyard
-     */
-    fun isPlotInScrapyard(plotPos: Vector2i):Boolean {
-        return abs(plotPos.x) >= (voidDistance / CHUNK_SIZE) / PLOT_SIZE || abs(plotPos.y) >= (voidDistance / CHUNK_SIZE) / PLOT_SIZE
-    }
 
     companion object {
         const val CHUNK_SIZE = 16 // blocks per chunk
         const val PLOT_SIZE: Int = 2 // must a f(x) = 2^x
+        const val VOID_DIST: Int = 28672000
+
+        /**
+         * Returns true if a chunk is in the scrapyard
+         */
+        fun isChunkInScrapyard(chunkPos: ChunkPos):Boolean {
+            return abs(chunkPos.x) >= VOID_DIST / CHUNK_SIZE || abs(chunkPos.z) >= VOID_DIST / CHUNK_SIZE
+        }
+
+        /**
+         * Returns true if a plot is in the scrapyard
+         */
+        fun isPlotInScrapyard(plotPos: Vector2i):Boolean {
+            return abs(plotPos.x) >= (VOID_DIST / CHUNK_SIZE) / PLOT_SIZE || abs(plotPos.y) >= (VOID_DIST / CHUNK_SIZE) / PLOT_SIZE
+        }
 
         /**
          * Returns the plot position from a chunk position.

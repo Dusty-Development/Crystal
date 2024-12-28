@@ -11,7 +11,7 @@ class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManage
     val renderSystem = ContraptionRenderSystem(clientWorld)
     override val isClientSide: Boolean = true
 
-    // ships are only to be created on the server.
+    // ships are only to be created on the world.
     // This is to avoid issues when assigning a id.
     fun createAndAddContraptionFromPacket(id:UUID, transform: Transform, plotPos: Vector2i): ClientContraption {
         val plot = scrapyard.createPlot(plotPos)

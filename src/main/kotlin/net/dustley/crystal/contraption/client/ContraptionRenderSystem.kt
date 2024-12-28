@@ -1,17 +1,19 @@
 package net.dustley.crystal.contraption.client
 
 import net.dustley.crystal.api.contraption.contraptionManager
+import net.dustley.crystal.api.render.renderLine
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.RenderLayers
 import net.minecraft.client.render.VertexConsumerProvider
+import net.minecraft.client.render.debug.DebugRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Text
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.RotationAxis
+import net.minecraft.util.math.*
 import net.minecraft.util.math.random.Random
+import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector2i
 
@@ -48,8 +50,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.multiply(Quaternionf(transform.rotation))
 
         stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
-        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MinecraftClient.getInstance().player!!.age / 3f))
-        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MinecraftClient.getInstance().player!!.age / 1.5f))
+        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MathHelper.sin(MinecraftClient.getInstance().player!!.age / 10f) * 0.5f))
+        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(MinecraftClient.getInstance().player!!.age / 10f) * 1.5f))
 
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
@@ -66,6 +68,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         val client = MinecraftClient.getInstance()
         val blockRenderManager = client.blockRenderManager
         val random: Random = Random.create()
+        random.setSeed(MinecraftClient.getInstance().player!!.age.toLong())
 
         // For now, we make a plot at 0,0 so that testing is easy
         val plot = world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
@@ -84,8 +87,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
             stack.push() // Push into the Section
 
-            val sectionYBottom = world.bottomY
-            val sectionYTop = world.topY
+            val sectionYBottom = -15// world.bottomY
+            val sectionYTop = 15 //world.topY
 
             val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
             val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
@@ -105,19 +108,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
                             stack.push() // Push into the block
 
                             stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
-                            if (fluidState.isEmpty) blockRenderManager.renderBlock(
-                                blockState,
-                                blockPos,
-                                world,
-                                stack,
-                                vertexConsumer,
-                                true,
-                                random
-                            )
-                            blockRenderManager.renderDamage(blockState, blockPos, world, stack, vertexConsumer)
-//                        if(world.getBlockEntity(blockPos) != null) blockRenderManager.renderBlockAsEntity(blockState, stack, consumers, world.getLightLevel(blockPos), 0)
-//                        else
-//                            blockRenderManager.renderFluid(blockPos, world, vertexConsumer, blockState, fluidState)
+                            if (fluidState.isEmpty) blockRenderManager.renderBlock(blockState, blockPos, world, stack, vertexConsumer, true, random)
+//                            else blockRenderManager.renderFluid(blockPos, world, vertexConsumer, blockState, fluidState)
 
                             stack.pop() // Pop out of the block
                         }
@@ -224,16 +216,32 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         val xOffset: Float = -textRenderer.getWidth(chunkText) / 2f
 
         val camPos = context.camera().pos
+        val transform = contraption.transform
 
-        val matrix = contraption.transform.getMatrix4f()
+        val matrix = Matrix4f()
             .translate(-camPos.x.toFloat(), -camPos.y.toFloat(), -camPos.z.toFloat())
+            .translate(
+                transform.position.x.toFloat(),
+                transform.position.y.toFloat() + 1f,
+                transform.position.z.toFloat()
+            )
             .rotate(RotationAxis.NEGATIVE_Y.rotationDegrees(context.camera().yaw))
             .rotate(RotationAxis.POSITIVE_X.rotationDegrees(context.camera().pitch))
-            .rotate(RotationAxis.NEGATIVE_Z.rotationDegrees(180f))
-            .scale(0.025f)
+            .scale(-0.025f)
 
+        textRenderer.draw(chunkText, xOffset, 0f, color, false, matrix, context.consumers(), TextRenderer.TextLayerType.NORMAL, color, 255)
 
-        textRenderer.draw(chunkText, xOffset, 0f, color, false, matrix, context.consumers(), TextRenderer.TextLayerType.NORMAL, color, 15)
+        val box = Box.of(Vec3d.ZERO, 0.25,0.25,0.25)
+        val vertexConsumer = context.consumers()
+        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,0.75f)
+
+        // Draw the lines
+        if (vertexConsumer != null) {
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
+        }
+
         stack.pop()
     }
 

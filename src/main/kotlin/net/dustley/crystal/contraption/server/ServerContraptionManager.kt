@@ -18,9 +18,9 @@ class ServerContraptionManager(serverWorld: ServerWorld) : ContraptionManager(se
     override val isClientSide: Boolean = false
 
     /**
-     * Creates a new contraption on the server, and sends it to clients
+     * Creates a new contraption on the world, and sends it to clients
      *
-     * Calling on client will result in nothing done, ships are only to be created on the server.
+     * Calling on client will result in nothing done, ships are only to be created on the world.
      * This is to avoid issues when assigning a id.
      */
     fun createAndAddContraption(transform: Transform): Contraption {

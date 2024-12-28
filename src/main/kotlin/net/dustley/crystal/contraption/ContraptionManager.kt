@@ -12,7 +12,7 @@ import java.util.*
 
 abstract class ContraptionManager(val world: World) {
 
-    abstract val isClientSide:Boolean // Just here to make checking for server or client side easy
+    abstract val isClientSide:Boolean // Just here to make checking for world or client side easy
 
     val scrapyard = ScrapyardPlotManager(world)
 

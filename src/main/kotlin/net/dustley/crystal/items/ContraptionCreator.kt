@@ -27,7 +27,7 @@ class ContraptionCreator : Item(Settings().maxCount(1)) {
 
             val pos = contraption.plot.centerPos.toMinecraft()
 
-            world.setBlockState(BlockPos.ofFloored(pos), Blocks.GOLD_BLOCK.defaultState)
+            world.setBlockState(BlockPos.ofFloored(pos).withY(0), Blocks.GOLD_BLOCK.defaultState)
         }
 
         return super.useOnBlock(context)

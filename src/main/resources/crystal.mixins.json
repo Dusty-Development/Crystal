@@ -3,8 +3,13 @@
   "package": "net.dustley.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "server.ServerChunkLoadingManagerMixin",
-    "server.ServerWorldMixin"
+    "accessor.ChunkTicketManagerAccessor",
+    "accessor.ServerChunkLoadingManagerAccessor",
+    "world.ServerChunkLoadingManagerMixin",
+    "world.ServerWorldMixin",
+    "world.chunk.ChunkGeneratorMixin",
+    "world.worldgen.FlatChunkGeneratorMixin",
+    "world.worldgen.NoiseChunkGeneratorMixin"
   ],
   "client": [
     "client.ClientWorldMixin",

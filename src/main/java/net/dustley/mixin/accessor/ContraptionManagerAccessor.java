@@ -1,7 +1,7 @@
-package net.dustley.accessor;
+package net.dustley.mixin.accessor;
 
 import net.dustley.crystal.contraption.ContraptionManager;
 
 public interface ContraptionManagerAccessor {
-    ContraptionManager getContraptionManager();
+    ContraptionManager crystal$getContraptionManager();
 }
