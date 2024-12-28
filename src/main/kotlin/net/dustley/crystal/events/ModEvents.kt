@@ -16,7 +16,7 @@ object ModEvents {
     fun registerClientModEvents() {
         // Renderer
         WorldRenderEvents.AFTER_TRANSLUCENT.register(WorldRenderEvents.AfterTranslucent { context ->
-            context.world().contraptionManager().renderSystem.updateAndRender(context.camera().lastTickDelta.toDouble(), context)
+            context.world().contraptionManager().update(context.camera().lastTickDelta.toDouble(), context)
         })
     }
 }
