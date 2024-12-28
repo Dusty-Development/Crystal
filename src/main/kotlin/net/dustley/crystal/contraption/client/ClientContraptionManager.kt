@@ -18,6 +18,8 @@ class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManage
         val contraption = ClientContraption(id, transform, plot, this)
         addContraption(id, contraption)
 
+        setupContraptionPhys(contraption)
+
         println("CREATED CLIENT CONTRAPTION WITH COUNT: ${contraptions.size}")
         return contraption
     }

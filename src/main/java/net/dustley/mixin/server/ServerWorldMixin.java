@@ -45,6 +45,7 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
     private void postTick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
         final ServerWorld self = ServerWorld.class.cast(this);
 
+        contraptionManager.tick();
 //        self.getChunkManager().chunkLoadingManager.
     }
 

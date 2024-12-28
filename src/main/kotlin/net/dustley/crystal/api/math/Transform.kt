@@ -4,6 +4,7 @@ import org.joml.Matrix4d
 import org.joml.Matrix4f
 import org.joml.Quaterniond
 import org.joml.Vector3d
+import physx.common.PxTransform
 
 data class Transform (
     val position: Vector3d = Vector3d(),
@@ -17,6 +18,8 @@ data class Transform (
         transform.scale(scale)
         return transform
     }
+
+    fun toPx() = PxTransform(this.position.toPx(), this.rotation.toPx())
 
     fun getMatrix4f() : Matrix4f { return Matrix4f(getMatrix4d()) }
 }

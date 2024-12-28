@@ -6,6 +6,7 @@ import net.dustley.crystal.contraption.Contraption
 import net.dustley.crystal.contraption.ContraptionManager
 import net.dustley.crystal.network.s2c.CreateContraptionS2CPacketPayload
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.world.World
@@ -13,7 +14,7 @@ import org.joml.Vector2i
 import java.util.*
 
 
-class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManager(serverWorld as World) {
+class ServerContraptionManager(serverWorld: ServerWorld) : ContraptionManager(serverWorld as World) {
     override val isClientSide: Boolean = false
 
     /**
@@ -25,7 +26,11 @@ class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManage
     fun createAndAddContraption(transform: Transform): Contraption {
         val id: UUID = UUID.randomUUID()
         val plot = scrapyard.createPlot()
+
         val contraption = ServerContraption(id, transform, plot, this)
+
+        this.setupContraptionPhys(contraption)
+
         addContraption(id, contraption)
 
         world.players.forEach {
@@ -35,7 +40,7 @@ class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManage
             )
         }
 
-        Crystal.LOGGER.info("CREATED SERVER CONTRAPTION WITH COUNT: ${contraptions.size}")
+        println("CREATED SERVER CONTRAPTION WITH COUNT: ${contraptions.size}")
 
         return contraption
     }

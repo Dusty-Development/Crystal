@@ -8,7 +8,7 @@ import java.util.*
 
 abstract class Contraption(
     val uuid: UUID,
-    val transform: Transform,
+    var transform: Transform,
     val plot: ScrapyardPlot,
     val contraptionManager: ContraptionManager
 ) {
@@ -21,14 +21,14 @@ abstract class Contraption(
      * Runs every game tick
      */
     fun tick() {
-
+        transform = contraptionManager.handler.fetch(uuid)
     }
 
     /**
      * Runs every physics tick
      */
     fun physTick() {
-
+        //TODO: remove this if it's unnecesart
     }
 
 }

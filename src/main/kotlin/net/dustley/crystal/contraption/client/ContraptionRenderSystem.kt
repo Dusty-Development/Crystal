@@ -20,7 +20,7 @@ import org.joml.Vector2i
 
 //https://github.com/ValkyrienSkies/Valkyrien-Skies-2/blob/1.18.x/main/common/src/main/java/org/valkyrienskies/mod/mixin/client/renderer/MixinLevelRenderer.java
 
-class ContraptionRenderSystem(val world:ClientWorld) {
+class ContraptionRenderSystem(val world: ClientWorld) {
 
     fun updateAndRender(deltaTime: Double, context: WorldRenderContext) {
         val stack = context.matrixStack() ?: return
@@ -42,9 +42,10 @@ class ContraptionRenderSystem(val world:ClientWorld) {
         val stack = context.matrixStack() ?: return
         stack.push()
 
-        val position = contraption.transform.position
+        val transform = contraption.contraptionManager.handler.fetch(contraption.uuid)
+        val position = transform.position
         stack.translate(position.x, position.y, position.z)
-        stack.multiply(Quaternionf(contraption.transform.rotation))
+        stack.multiply(Quaternionf(transform.rotation))
 
         stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
         stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MinecraftClient.getInstance().player!!.age / 3f))

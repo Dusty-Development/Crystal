@@ -1,10 +1,13 @@
 package net.dustley.crystal.contraption
 
 import net.dustley.crystal.Crystal
+import net.dustley.crystal.contraption.physics.PhysXHandler
 import net.dustley.crystal.scrapyard.ScrapyardPlotManager
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
+import physx.PxTopLevelFunctions
+import physx.physics.PxShape
 import java.util.*
 
 abstract class ContraptionManager(val world: World) {
@@ -14,6 +17,8 @@ abstract class ContraptionManager(val world: World) {
     val scrapyard = ScrapyardPlotManager(world)
 
     val contraptions: MutableMap<UUID, Contraption> = mutableMapOf()
+
+    val handler: PhysXHandler = PhysXHandler(2, world)
 
     // GAME EVENTS \\
     init {
@@ -34,21 +39,26 @@ abstract class ContraptionManager(val world: World) {
      * Runs every game tick
      */
     fun tick() {
-
+        for (contraption: Contraption in contraptions.values) {
+            contraption.tick()
+        }
     }
 
     /**
      * Runs every physics tick
      */
     fun physTick() {
-
+        handler.tick(1/60f)
     }
 
-    // CONTRAPTIONS \\
-
     /**
-     * Adds a created contraption to the manager
+     * Sets up the physics of a new contraption
      */
+    fun setupContraptionPhys(contraption: Contraption) {
+        val shape: PxShape = handler.createBox()
+        handler.createActor(contraption.uuid, contraption.transform, shape)
+    }
+
     fun addContraption(id: UUID, contraption: Contraption) = contraptions.put(id, contraption)
 
     /**
