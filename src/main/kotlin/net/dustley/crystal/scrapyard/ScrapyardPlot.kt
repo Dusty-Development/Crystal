@@ -25,7 +25,7 @@ class ScrapyardPlot(
     val controlledChunkPositions: List<ChunkPos>
     var controllingContraptionPart: Contraption? = null
 
-    //val chunkManager: PlotChunkManager
+    val chunkManager: PlotChunkManager
 
     init {
         val halfSideSize = PLOT_SIZE / 2
@@ -48,7 +48,7 @@ class ScrapyardPlot(
         centerChunkPos = plotToChunkPos(Vector2i(plotPosition)).toJOML().add(halfSideSize, halfSideSize).toChunkPos()
         centerPos = scrapyardAABB.center.toJOML()
 
-        //chunkManager = PlotChunkManager(controlledChunkPositions)
+        chunkManager = PlotChunkManager(controlledChunkPositions, world, this)
     }
 
     companion object {

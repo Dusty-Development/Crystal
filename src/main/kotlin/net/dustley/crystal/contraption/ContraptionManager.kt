@@ -4,11 +4,11 @@ import net.dustley.crystal.Crystal
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.contraption.physics.PhysXHandler
 import net.dustley.crystal.scrapyard.ScrapyardPlotManager
+import net.dustley.crystal.scrapyard.chunk.PlotUpdate
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
-import physx.physics.PxShape
 import java.util.*
 
 abstract class ContraptionManager(val world: World) {
@@ -69,6 +69,7 @@ abstract class ContraptionManager(val world: World) {
             }
         }
     }
+
     /**
      * Sets up the physics of a new contraption
      */
@@ -123,6 +124,14 @@ abstract class ContraptionManager(val world: World) {
 //            val contraption = Contraption.fromNbt(savedData.data.getCompound(key))
 //            contraptions[id] = contraption
 //        }
+    }
+
+    fun applyPlotUpdates(updates:List<PlotUpdate>) {
+        updates.forEach { plotUpdate ->
+            val chunkPos = ChunkPos(plotUpdate.chunkSectionPos.x(), plotUpdate.chunkSectionPos.z())
+            val plot = scrapyard.getPlot(chunkPos)
+            plot?.chunkManager?.updateWithData(plotUpdate)
+        }
     }
 
 }

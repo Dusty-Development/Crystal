@@ -30,6 +30,7 @@ public abstract class ServerChunkLoadingManagerMixin {
     @Inject(method = "getPlayersWatchingChunk(Lnet/minecraft/util/math/ChunkPos;Z)Ljava/util/List;", at = @At("TAIL"), cancellable = true)
     private void postGetPlayersWatchingChunk(ChunkPos chunkPos, boolean onlyOnWatchDistanceEdge, CallbackInfoReturnable<List<ServerPlayerEntity>> cir) {
 
+
         final Iterator<ServerPlayerEntity> playersWatchingShipChunk = world.getPlayers().iterator();
         if (!playersWatchingShipChunk.hasNext()) {
             // No players watching this ship chunk, so we don't need to modify anything
@@ -49,5 +50,6 @@ public abstract class ServerChunkLoadingManagerMixin {
 
         cir.setReturnValue(new ArrayList<>(watchingPlayers));
     }
+
 
 }

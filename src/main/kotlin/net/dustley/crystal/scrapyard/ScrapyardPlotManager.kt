@@ -72,9 +72,6 @@ class ScrapyardPlotManager (
         throw IllegalArgumentException("COULD NOT FIND A PLOT FOR THE SHIP")
     }
 
-
-
-
     companion object {
         const val CHUNK_SIZE = 16 // blocks per chunk
         const val PLOT_SIZE: Int = 2 // must a f(x) = 2^x
