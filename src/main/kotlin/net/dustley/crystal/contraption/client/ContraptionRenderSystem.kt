@@ -24,7 +24,7 @@ import org.joml.Vector2i
 
 class ContraptionRenderSystem(val world: ClientWorld) {
 
-    fun updateAndRender(deltaTime: Double, context: WorldRenderContext) {
+    fun updateAndRender(context: WorldRenderContext) {
         val stack = context.matrixStack() ?: return
         stack.push()
 
@@ -51,8 +51,9 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
-        renderChunks(contraption, stack, context)
-        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context)
+//        renderChunks(contraption, stack, context)
+        //if(context.gameRenderer().client.debugHud.shouldShowDebugHud())
+            renderDebug(contraption, stack, context)
 
         stack.pop()
     }
@@ -67,7 +68,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         random.setSeed(MinecraftClient.getInstance().player!!.age.toLong())
 
         // For now, we make a plot at 0,0 so that testing is easy
-        val plot = contraption.plot
+        val plot = world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
         val plotCenterBlockPos = BlockPos(plot.centerPos.x.toInt(), plot.centerPos.y.toInt(), plot.centerPos.z.toInt())
 
         stack.push() // Push into the plot
@@ -83,8 +84,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
             stack.push() // Push into the Section
 
-            val sectionYBottom = world.bottomY
-            val sectionYTop = world.topY
+            val sectionYBottom = -10
+            val sectionYTop = 10
 
             val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
             val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
@@ -225,18 +226,19 @@ class ContraptionRenderSystem(val world: ClientWorld) {
             .rotate(RotationAxis.POSITIVE_X.rotationDegrees(context.camera().pitch))
             .scale(-0.025f)
 
-        textRenderer.draw(chunkText, xOffset, 0f, color, false, matrix, context.consumers(), TextRenderer.TextLayerType.NORMAL, color, 255)
+        //textRenderer.draw(chunkText, xOffset, 0f, color, false, matrix, context.consumers(), TextRenderer.TextLayerType.NORMAL, color, 255)
 
-        val box = Box.of(Vec3d.ZERO, 0.25,0.25,0.25)
+        val scale = 1.0
+        val box = Box.of(Vec3d.ZERO, scale, scale, scale)
         val vertexConsumer = context.consumers()
-        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,0.75f)
+        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,1f)
 
         // Draw the lines
-        if (vertexConsumer != null) {
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
-        }
+//        if (vertexConsumer != null) {
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
+//        }
 
         stack.pop()
     }

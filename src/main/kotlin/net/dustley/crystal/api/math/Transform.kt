@@ -1,5 +1,6 @@
 package net.dustley.crystal.api.math
 
+import net.minecraft.nbt.NbtCompound
 import org.joml.Matrix4d
 import org.joml.Matrix4f
 import org.joml.Quaterniond
@@ -22,4 +23,17 @@ data class Transform (
     fun toPx() = PxTransform(this.position.toPx(), this.rotation.toPx())
 
     fun getMatrix4f() : Matrix4f { return Matrix4f(getMatrix4d()) }
+
+    fun toNBT(): NbtCompound {
+        val out = NbtCompound()
+        out.putDouble("positon-x", position.x)
+        out.putDouble("positon-y", position.y)
+        out.putDouble("positon-z", position.z)
+        out.putDouble("scale", scale)
+        out.putDouble("rotation-x", rotation.x)
+        out.putDouble("rotation-y", rotation.y)
+        out.putDouble("rotation-z", rotation.z)
+        out.putDouble("rotation-w", rotation.w)
+        return out
+    }
 }

@@ -6,7 +6,9 @@ import net.dustley.crystal.contraption.physics.PhysXHandler
 import net.dustley.crystal.scrapyard.ScrapyardPlotManager
 import net.dustley.crystal.scrapyard.chunk.PlotUpdate
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
+import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import java.util.*
@@ -24,16 +26,13 @@ abstract class ContraptionManager(val world: World) {
     // GAME EVENTS \\
     init {
         Crystal.LOGGER.info("Created Contraption Manager for world: $world")
-        loadContraptions()
     }
 
     /**
      * Runs when the world closes
      */
     fun unload() {
-        saveContraptions()
-
-        Crystal.LOGGER.info("UnLoaded ContraptionManager for world: $world")
+        Crystal.LOGGER.info("Unloaded ContraptionManager for world: $world")
     }
 
     /**
@@ -63,18 +62,19 @@ abstract class ContraptionManager(val world: World) {
             for (contraption: Contraption in contraptions.values) {
                 val actor = handler.actors[contraption.uuid]
 
-                if (actor != null) {
-                    contraption.transform = actor.globalPose.toCrystal()
+                if(actor != null) {
+                    contraption.transform = actor.actor.globalPose.toCrystal()
                 }
             }
         }
     }
-
     /**
      * Sets up the physics of a new contraption
      */
     fun setupContraptionPhys(contraption: Contraption) {
-        handler.createBoxActor(contraption.uuid, contraption.transform, contraption.plot.chunkManager.aabb)
+        handler.createBoxActor(contraption.uuid, contraption.transform, Box(0.0, 0.0, 0.0, .5, .5, .5)
+            //contraption.plot.chunkManager.aabb
+        )
     }
 
     open fun postUpdate(deltaTime: Double, context: WorldRenderContext) {}
@@ -124,14 +124,6 @@ abstract class ContraptionManager(val world: World) {
 //            val contraption = Contraption.fromNbt(savedData.data.getCompound(key))
 //            contraptions[id] = contraption
 //        }
-    }
-
-    fun applyPlotUpdates(updates:List<PlotUpdate>) {
-        updates.forEach { plotUpdate ->
-            val chunkPos = ChunkPos(plotUpdate.chunkSectionPos.x(), plotUpdate.chunkSectionPos.z())
-            val plot = scrapyard.getPlot(chunkPos)
-            plot?.chunkManager?.updateWithData(plotUpdate)
-        }
     }
 
 }

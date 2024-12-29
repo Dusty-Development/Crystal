@@ -22,7 +22,9 @@ class PhysXHandler(threads: Int = 4, world: World) {
     private var physics: PxPhysics
     var scene: PxScene
 
-    val actors: HashMap<UUID,PxRigidDynamic> = hashMapOf()
+    val actors: HashMap<UUID,ActorData> = hashMapOf()
+
+    data class ActorData(val actor: PxRigidDynamic, val shape: PxShape, val material: PxMaterial)
     private val terrain: PxRigidStatic
 
     private val filterData = PxFilterData(1, 1, 0, 0)
@@ -39,7 +41,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
 
         // create a physics scene
         val sceneDesc = PxSceneDesc(tolerances);
-        sceneDesc.gravity = PxVec3(0f, -10f, 0f)
+        sceneDesc.gravity = PxVec3(0f, -49f, 0f)
         sceneDesc.cpuDispatcher = dispatcher
         sceneDesc.filterShader = PxTopLevelFunctions.DefaultFilterShader();
         scene = physics.createScene(sceneDesc);
@@ -49,7 +51,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
 
         val terrainShape = physics.createShape(PxBoxGeometry(100f, 1f, 100f), physics.createMaterial(.5f, .5f, .5f), true, shapeFlags) //TODO: make this not the most dipshittery thing
         terrainShape.simulationFilterData = filterData
-        terrain = physics.createRigidStatic(Transform(Vector3d(0.0, 0.0, 0.0)).toPx())
+        terrain = physics.createRigidStatic(Transform(Vector3d(0.0, -61.0, 0.0)).toPx())
         terrain.attachShape(terrainShape)
         scene.addActor(terrain)
 
@@ -89,7 +91,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actors[id] = body
+        actors[id] = ActorData(body, shape, physics.createMaterial(.5f, .5f, .5f)) //TODO: remove hotfic material
         LOGGER.info(body.mass.toString())
         return body
     }
@@ -99,13 +101,13 @@ class PhysXHandler(threads: Int = 4, world: World) {
     }
 
     fun createBoxActor(id: UUID, pose: Transform, aabb: Box): PxRigidDynamic {
-        val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), physics.createMaterial(.5f, .5f, .5f), true, shapeFlags)
+        val material = physics.createMaterial(.5f, .5f, .5f)
+        val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), material, true, shapeFlags)
         val body = physics.createRigidDynamic(pose.toPx())
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actors[id] = body
-        LOGGER.info(body.mass.toString())
+        actors[id] = ActorData(body, shape, material)
         return body
     }
 
@@ -116,7 +118,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
     fun tick(deltaTime: Float) {
         if(actors.values.isNotEmpty()) {
             val actor = actors.values.first()
-            actor.addForce(Vector3d(0.1, 0.0, 0.0).toPx())
+            //actor.addForce(Vector3d(0.1, 0.0, 0.0).toPx())
         }
         scene.simulate(deltaTime)
 
@@ -128,10 +130,10 @@ class PhysXHandler(threads: Int = 4, world: World) {
             throw NullPointerException()
         }
 
-        return actor.globalPose.toCrystal()
+        return actor.actor.globalPose.toCrystal()
     }
 
-    class ContraptionGeometry {
+    class ContraptionActor {
         //TODO: use to make createshape good
     }
 }
