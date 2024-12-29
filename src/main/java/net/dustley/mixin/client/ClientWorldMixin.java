@@ -1,22 +1,30 @@
 package net.dustley.mixin.client;
 
 import net.dustley.accessor.ContraptionManagerAccessor;
+import net.dustley.crystal.Crystal;
+import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.client.ClientContraptionManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.math.ChunkPos;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin implements ContraptionManagerAccessor {
+    @Shadow @Final private ClientChunkManager chunkManager;
     @Unique private ClientContraptionManager contraptionManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -36,5 +44,24 @@ public class ClientWorldMixin implements ContraptionManagerAccessor {
 
     public ClientContraptionManager crystal$getContraptionManager() {
         return contraptionManager;
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void preTick(final BooleanSupplier shouldKeepTicking, final CallbackInfo ci) {
+        final ClientWorld self = ClientWorld.class.cast(this);
+        final ClientContraptionManager contraptionManager = crystal$getContraptionManager();
+
+        contraptionManager.tick();
+
+        for (Contraption contraption : contraptionManager.getContraptions().values()) {
+            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
+                boolean a = self.isChunkLoaded(chunkPosition.x, chunkPosition.z);
+                a = a; // just so i can read the value with breakpoint
+//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
+//                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 0, chunkPosition);
+            }
+
+            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
+        }
     }
 }

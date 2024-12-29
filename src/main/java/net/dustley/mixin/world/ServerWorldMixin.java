@@ -2,38 +2,44 @@ package net.dustley.mixin.world;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.dustley.accessor.ContraptionManagerAccessor;
+import net.dustley.crystal.Crystal;
+import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.dustley.crystal.scrapyard.chunk.PlotUpdate;
-import net.dustley.mixin.accessor.ChunkTicketManagerAccessor;
-import net.dustley.mixin.accessor.ServerChunkLoadingManagerAccessor;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerWorld.class)
 public class ServerWorldMixin implements ContraptionManagerAccessor {
+    @Shadow @Final private ServerChunkManager chunkManager;
+    @Shadow @Final private MinecraftServer server;
     @Unique private ServerContraptionManager contraptionManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -65,31 +71,48 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
     @Unique
     private static final long crystal$CHUNK_UNLOAD_WAIT = 100;
 
-    @Inject(method = "tick", at = @At("TAIL"))
-    private void postTick(final BooleanSupplier shouldKeepTicking, final CallbackInfo ci) {
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void preTick(final BooleanSupplier shouldKeepTicking, final CallbackInfo ci) {
         final ServerWorld self = ServerWorld.class.cast(this);
         final ServerContraptionManager contraptionManager = crystal$getContraptionManager();
-        final ServerChunkLoadingManagerAccessor chunkLoadingManager = (ServerChunkLoadingManagerAccessor) self.getChunkManager().chunkLoadingManager;
+//        final ServerChunkLoadingManager chunkLoadingManager = self.getChunkManager().chunkLoadingManager;
+//        final ServerChunkLoadingManagerAccessor chunkLoadingManagerAccessor = (ServerChunkLoadingManagerAccessor) chunkLoadingManager;
 
         contraptionManager.tick();
-        
 
         // Create DenseVoxelShapeUpdate for new loaded chunks
         // Also mark the chunks as loaded in the ship objects
         final List<PlotUpdate> voxelShapeUpdates = new ArrayList<>();
-        
-//        final DistanceManagerAccessor distanceManagerAccessor = (DistanceManagerAccessor) chunkSource.chunkMap.getDistanceManager();
-        final ChunkTicketManagerAccessor ticketManager = (ChunkTicketManagerAccessor) (chunkLoadingManager.getTicketManager());
+//        final ChunkTicketManagerAccessor ticketManager = (ChunkTicketManagerAccessor) (chunkLoadingManager.getTicketManager());
 
-        for (final ChunkHolder chunkHolder : chunkLoadingManager.callEntryIterator()) {
-            final Optional<WorldChunk> worldChunkOptional = chunkHolder.getTickingFuture().getNow(ChunkHolder.UNLOADED_WORLD_CHUNK).left();
-            // Only load chunks that are present and that have tickets
-            if (worldChunkOptional.isPresent() && ticketManager.getTickets().containsKey(chunkHolder.getPos().toLong())) {
-                // Only load chunks that have a ticket
-                final WorldChunk worldChunk = worldChunkOptional.get();
-                crystal$loadChunk(worldChunk, voxelShapeUpdates);
+        for (Contraption contraption : contraptionManager.getContraptions().values()) {
+            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
+
+            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
+//                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
+//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
+//                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 0, chunkPosition);
             }
+//            self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z);
         }
+
+
+//
+//        for (final ChunkHolder chunkHolder : chunkLoadingManagerAccessor.callEntryIterator()) {
+//            final Optional<WorldChunk> worldChunkOptional = chunkHolder.getTickingFuture().getNow(ChunkHolder.UNLOADED_WORLD_CHUNK).left();
+//            // Only load chunks that are present and that have tickets
+//            if (worldChunkOptional.isPresent() && ticketManager.getTickets().containsKey(chunkHolder.getPos().toLong())) {
+//                // Only load chunks that have a ticket
+//                final WorldChunk worldChunk = worldChunkOptional.get();
+//                crystal$loadChunk(worldChunk, voxelShapeUpdates);
+//            }
+//        }
+
+
+        // The commented code below is for unloading...
+        // I could give 2 fucks less about that rn tho sooooooo-
+        // ignore it
+
 //
 //        final Iterator<Map.Entry<ChunkPos, List<Vector3ic>>> knownChunkPosIterator = crystal$knownChunks.entrySet().iterator();
 //        while (knownChunkPosIterator.hasNext()) {

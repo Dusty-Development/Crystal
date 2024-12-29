@@ -11,6 +11,10 @@ base {
 	archivesName = project.archives_base_name
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/crystal.accesswidener")
+}
+
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' } // Required if using JitPack-hosted projects
