@@ -56,7 +56,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
         renderChunks(contraption, stack, context)
-        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebugText(contraption, stack, context)
+        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context)
 
         stack.pop()
     }
@@ -205,7 +205,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 //        }
 //    }
 
-    fun renderDebugText(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
+    fun renderDebug(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
         stack.push()
         // Render the chunk coordinates as text
         val chunkText: Text = Text.of("UUID: ${contraption.uuid} | Plot: {${contraption.plot.plotPosition.x()}, ${contraption.plot.plotPosition.y()}}")

@@ -1,6 +1,6 @@
 package net.dustley.mixin.world;
 
-import net.dustley.mixin.accessor.ContraptionManagerAccessor;
+import net.dustley.accessor.ContraptionManagerAccessor;
 import net.dustley.mixin.accessor.ServerChunkLoadingManagerAccessor;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.minecraft.registry.RegistryKey;

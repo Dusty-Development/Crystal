@@ -1,4 +1,4 @@
-package net.dustley.mixin.accessor;
+package net.dustley.accessor;
 
 import net.dustley.crystal.contraption.ContraptionManager;
 

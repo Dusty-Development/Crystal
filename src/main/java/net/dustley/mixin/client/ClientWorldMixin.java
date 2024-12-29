@@ -1,6 +1,6 @@
 package net.dustley.mixin.client;
 
-import net.dustley.mixin.accessor.ContraptionManagerAccessor;
+import net.dustley.accessor.ContraptionManagerAccessor;
 import net.dustley.crystal.contraption.client.ClientContraptionManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;

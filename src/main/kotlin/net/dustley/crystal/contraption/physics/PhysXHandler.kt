@@ -1,14 +1,12 @@
 package net.dustley.crystal.contraption.physics
 
-import net.dustley.crystal.Crystal
 import net.dustley.crystal.Crystal.LOGGER
-import net.dustley.crystal.Crystal.version
 import net.dustley.crystal.Crystal.foundation
+import net.dustley.crystal.Crystal.version
 import net.dustley.crystal.api.math.Transform
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.api.math.toPx
 import net.minecraft.world.World
-import org.jetbrains.annotations.NotNull
 import org.joml.Vector3d
 import physx.PxTopLevelFunctions
 import physx.common.*
@@ -40,7 +38,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
 
         // create a physics scene
         val sceneDesc = PxSceneDesc(tolerances);
-        sceneDesc.gravity = PxVec3(0f, -98f, 0f)
+        sceneDesc.gravity = PxVec3(0f, -10f, 0f)
         sceneDesc.cpuDispatcher = dispatcher
         //sceneDesc.setFilterShader(PxTopLevelFunctions.DefaultFilterShader()); literally no idea what this does
         scene = physics.createScene(sceneDesc);

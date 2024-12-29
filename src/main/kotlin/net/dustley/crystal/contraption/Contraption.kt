@@ -29,6 +29,8 @@ abstract class Contraption(
      */
     fun physTick() {
         //TODO: remove this if it's unnecesart
+
+        // ^ its for applying forces
     }
 
 }

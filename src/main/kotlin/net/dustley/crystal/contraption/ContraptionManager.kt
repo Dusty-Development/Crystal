@@ -6,8 +6,6 @@ import net.dustley.crystal.scrapyard.ScrapyardPlotManager
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
-import physx.PxTopLevelFunctions
-import physx.physics.PxShape
 import java.util.*
 
 abstract class ContraptionManager(val world: World) {
@@ -18,7 +16,7 @@ abstract class ContraptionManager(val world: World) {
 
     val contraptions: MutableMap<UUID, Contraption> = mutableMapOf()
 
-    val handler: PhysXHandler = PhysXHandler(2, world)
+    val handler: PhysXHandler = PhysXHandler(4, world)
 
     // GAME EVENTS \\
     init {

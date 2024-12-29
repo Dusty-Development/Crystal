@@ -1,6 +1,6 @@
 package net.dustley.crystal.api.contraption
 
-import net.dustley.mixin.accessor.ContraptionManagerAccessor
+import net.dustley.accessor.ContraptionManagerAccessor
 import net.dustley.crystal.contraption.ContraptionManager
 import net.dustley.crystal.contraption.client.ClientContraptionManager
 import net.dustley.crystal.contraption.server.ServerContraptionManager
