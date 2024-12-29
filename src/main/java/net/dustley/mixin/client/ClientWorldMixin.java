@@ -1,7 +1,6 @@
 package net.dustley.mixin.client;
 
 import net.dustley.accessor.ContraptionManagerAccessor;
-import net.dustley.crystal.Crystal;
 import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.client.ClientContraptionManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -55,13 +54,10 @@ public class ClientWorldMixin implements ContraptionManagerAccessor {
 
         for (Contraption contraption : contraptionManager.getContraptions().values()) {
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-                boolean a = self.isChunkLoaded(chunkPosition.x, chunkPosition.z);
-                a = a; // just so i can read the value with breakpoint
-//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-//                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 0, chunkPosition);
+                self.getChunkManager().setChunkForced(chunkPosition, true);
             }
 
-            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
+//            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
         }
     }
 }

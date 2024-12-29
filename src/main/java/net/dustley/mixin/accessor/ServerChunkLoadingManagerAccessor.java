@@ -23,7 +23,4 @@ public interface ServerChunkLoadingManagerAccessor {
     @Accessor("unloadedChunks")
     LongSet getUnloadedChunks();
 
-//    // Cannot find this be weary
-//    @Accessor("ticketManager")
-//    ServerChunkLoadingManager getTicketManager();
 }

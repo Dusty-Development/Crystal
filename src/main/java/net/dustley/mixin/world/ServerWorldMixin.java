@@ -2,13 +2,13 @@ package net.dustley.mixin.world;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.dustley.accessor.ContraptionManagerAccessor;
-import net.dustley.crystal.Crystal;
 import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.dustley.crystal.scrapyard.chunk.PlotUpdate;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
+import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
@@ -86,12 +86,12 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
 //        final ChunkTicketManagerAccessor ticketManager = (ChunkTicketManagerAccessor) (chunkLoadingManager.getTicketManager());
 
         for (Contraption contraption : contraptionManager.getContraptions().values()) {
-            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
+//            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
 
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
 //                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
-//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-//                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 0, chunkPosition);
+                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
+                self.getChunkManager().addTicket(ChunkTicketType.UNKNOWN, chunkPosition, 0, chunkPosition);
             }
 //            self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z);
         }
@@ -137,7 +137,7 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
 //        }
 
         // Tell the manager to disperse updates
-        contraptionManager.applyPlotUpdates(voxelShapeUpdates);
+//        contraptionManager.applyPlotUpdates(voxelShapeUpdates);
     }
 
 

@@ -11,11 +11,13 @@ import net.minecraft.client.render.debug.DebugRenderer
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Text
-import net.minecraft.util.math.*
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Box
+import net.minecraft.util.math.RotationAxis
+import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.random.Random
 import org.joml.Matrix4f
 import org.joml.Quaternionf
-import org.joml.Vector2i
 
 
 //https://github.com/ValkyrienSkies/Valkyrien-Skies-2/blob/1.18.x/main/common/src/main/java/org/valkyrienskies/mod/mixin/client/renderer/MixinGameRenderer.java
@@ -51,9 +53,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
-//        renderChunks(contraption, stack, context)
-        //if(context.gameRenderer().client.debugHud.shouldShowDebugHud())
-            renderDebug(contraption, stack, context)
+        renderChunks(contraption, stack, context)
+        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context)
 
         stack.pop()
     }
@@ -68,8 +69,11 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         random.setSeed(MinecraftClient.getInstance().player!!.age.toLong())
 
         // For now, we make a plot at 0,0 so that testing is easy
-        val plot = world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
+        val plot = contraption.plot //world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
         val plotCenterBlockPos = BlockPos(plot.centerPos.x.toInt(), plot.centerPos.y.toInt(), plot.centerPos.z.toInt())
+
+        world.chunkManager.setChunkForced(plot.centerChunkPos, true)
+        world.chunkManager.isChunkLoaded(plot.centerChunkPos.x, plot.centerChunkPos.z)
 
         stack.push() // Push into the plot
 
@@ -231,14 +235,14 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         val scale = 1.0
         val box = Box.of(Vec3d.ZERO, scale, scale, scale)
         val vertexConsumer = context.consumers()
-        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,1f)
+        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,0.75f)
 
         // Draw the lines
-//        if (vertexConsumer != null) {
-//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
-//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
-//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
-//        }
+        if (vertexConsumer != null) {
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
+        }
 
         stack.pop()
     }
