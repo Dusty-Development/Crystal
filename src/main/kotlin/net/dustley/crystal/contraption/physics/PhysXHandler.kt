@@ -6,13 +6,13 @@ import net.dustley.crystal.Crystal.version
 import net.dustley.crystal.api.math.Transform
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.api.math.toPx
+import net.minecraft.util.math.Box
 import net.minecraft.world.World
 import org.joml.Vector3d
 import physx.PxTopLevelFunctions
 import physx.common.*
 import physx.geometry.PxBoxGeometry
 import physx.geometry.PxGeometry
-import physx.geometry.PxPlaneGeometry
 import physx.physics.*
 import java.util.*
 
@@ -25,7 +25,8 @@ class PhysXHandler(threads: Int = 4, world: World) {
     val actors: HashMap<UUID,PxRigidDynamic> = hashMapOf()
     private val terrain: PxRigidStatic
 
-    private val tmpFilterData = PxFilterData(1, 1, 0, 0)
+    private val filterData = PxFilterData(1, 1, 0, 0)
+    val shapeFlags = PxShapeFlags((PxShapeFlagEnum.eSCENE_QUERY_SHAPE.value or PxShapeFlagEnum.eSIMULATION_SHAPE.value).toByte())
 
     init {
         if(foundation == null) {
@@ -40,12 +41,15 @@ class PhysXHandler(threads: Int = 4, world: World) {
         val sceneDesc = PxSceneDesc(tolerances);
         sceneDesc.gravity = PxVec3(0f, -10f, 0f)
         sceneDesc.cpuDispatcher = dispatcher
-        //sceneDesc.setFilterShader(PxTopLevelFunctions.DefaultFilterShader()); literally no idea what this does
+        sceneDesc.filterShader = PxTopLevelFunctions.DefaultFilterShader();
         scene = physics.createScene(sceneDesc);
 
-        val terrainShape = physics.createShape(PxPlaneGeometry(), physics.createMaterial(.5f, .5f, .5f)) //TODO: make this not the most dipshittery thing
-        //terrainShape.simulationFilterData = tmpFilterData
-        terrain = physics.createRigidStatic(PxTransform(PxIDENTITYEnum.PxIdentity))
+
+        // create default simulation shape flags
+
+        val terrainShape = physics.createShape(PxBoxGeometry(100f, 1f, 100f), physics.createMaterial(.5f, .5f, .5f), true, shapeFlags) //TODO: make this not the most dipshittery thing
+        terrainShape.simulationFilterData = filterData
+        terrain = physics.createRigidStatic(Transform(Vector3d(0.0, 0.0, 0.0)).toPx())
         terrain.attachShape(terrainShape)
         scene.addActor(terrain)
 
@@ -82,6 +86,7 @@ class PhysXHandler(threads: Int = 4, world: World) {
 
     fun createActor(id: UUID, pose: Transform, shape: PxShape): PxRigidDynamic {
         val body = physics.createRigidDynamic(pose.toPx())
+        shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
         actors[id] = body
@@ -90,14 +95,18 @@ class PhysXHandler(threads: Int = 4, world: World) {
     }
 
     fun createShape(geometry: PxGeometry): PxShape {
-        //TODO: make this good
-        return physics.createShape(PxBoxGeometry(1.0f, 1.0f, 1.0f), physics.createMaterial(.5f, .5f, .5f))
+        return physics.createShape(geometry, physics.createMaterial(.5f, .5f, .5f))
     }
 
-    fun createBox(
-        //a: Vector3f, b: Vector3f
-    ): PxShape { //TODO: find AABB
-        return physics.createShape(PxBoxGeometry(1.0f, 1.0f, 1.0f), physics.createMaterial(.5f, .5f, .5f))
+    fun createBoxActor(id: UUID, pose: Transform, aabb: Box): PxRigidDynamic {
+        val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), physics.createMaterial(.5f, .5f, .5f), true, shapeFlags)
+        val body = physics.createRigidDynamic(pose.toPx())
+        shape.simulationFilterData = filterData
+        body.attachShape(shape)
+        scene.addActor(body)
+        actors[id] = body
+        LOGGER.info(body.mass.toString())
+        return body
     }
 
     fun release() {

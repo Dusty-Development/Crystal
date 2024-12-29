@@ -1,11 +1,14 @@
 package net.dustley.crystal.contraption
 
 import net.dustley.crystal.Crystal
+import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.contraption.physics.PhysXHandler
 import net.dustley.crystal.scrapyard.ScrapyardPlotManager
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
+import physx.physics.PxShape
 import java.util.*
 
 abstract class ContraptionManager(val world: World) {
@@ -37,21 +40,49 @@ abstract class ContraptionManager(val world: World) {
      * Runs every game tick
      */
     fun tick() {
-
+        //update contraption shape
+        //do tick based events such as plant growth or breaking a block
     }
+
+    private var mAccumulator = 0.0f
+    private val mStepSize = 1.0f / 60.0f
 
     /**
      * Runs every physics tick
      */
-    fun physTick(double: Double) {
+    fun physTick(deltaTime: Double) {
+        mAccumulator += deltaTime.toFloat()
+        if(mAccumulator > mStepSize) {
+            val scene = handler.scene
 
+            mAccumulator -= mStepSize + deltaTime.toFloat()
+
+            scene.simulate(mStepSize)
+
+            scene.fetchResults(true)
+            for (contraption: Contraption in contraptions.values) {
+                val actor = handler.actors[contraption.uuid]
+
+                if (actor != null) {
+                    contraption.transform = actor.globalPose.toCrystal()
+                }
+            }
+        }
     }
     /**
      * Sets up the physics of a new contraption
      */
-//    open fun setupContraptionPhys(contraption: Contraption) {
-//
-//    }
+    fun setupContraptionPhys(contraption: Contraption) {
+        handler.createBoxActor(contraption.uuid, contraption.transform, contraption.plot.chunkManager.aabb)
+    }
+
+    open fun postUpdate(deltaTime: Double, context: WorldRenderContext) {}
+
+    fun update(deltaTime: Double, context: WorldRenderContext) {
+        physTick(deltaTime)
+
+        postUpdate(deltaTime, context)
+    }
 
     fun addContraption(id: UUID, contraption: Contraption) = contraptions.put(id, contraption)
 

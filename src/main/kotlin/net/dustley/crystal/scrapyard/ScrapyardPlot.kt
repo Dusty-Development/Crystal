@@ -5,6 +5,7 @@ import net.dustley.crystal.api.math.toChunkPos
 import net.dustley.crystal.api.math.toJOML
 import net.dustley.crystal.api.math.toJOMLD
 import net.dustley.crystal.contraption.Contraption
+import net.dustley.crystal.scrapyard.chunk.PlotChunkManager
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkPos
@@ -23,6 +24,8 @@ class ScrapyardPlot(
     val scrapyardAABB:Box
     val controlledChunkPositions: List<ChunkPos>
     var controllingContraptionPart: Contraption? = null
+
+    //val chunkManager: PlotChunkManager
 
     init {
         val halfSideSize = PLOT_SIZE / 2
@@ -44,6 +47,8 @@ class ScrapyardPlot(
         // Center positions
         centerChunkPos = plotToChunkPos(Vector2i(plotPosition)).toJOML().add(halfSideSize, halfSideSize).toChunkPos()
         centerPos = scrapyardAABB.center.toJOML()
+
+        //chunkManager = PlotChunkManager(controlledChunkPositions)
     }
 
     companion object {

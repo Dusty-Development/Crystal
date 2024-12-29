@@ -49,10 +49,6 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.translate(position.x, position.y, position.z)
         stack.multiply(Quaternionf(transform.rotation))
 
-        stack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MinecraftClient.getInstance().player!!.age / 4f))
-        stack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MathHelper.sin(MinecraftClient.getInstance().player!!.age / 10f) * 0.5f))
-        stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(MinecraftClient.getInstance().player!!.age / 10f) * 1.5f))
-
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
         renderChunks(contraption, stack, context)
@@ -71,7 +67,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         random.setSeed(MinecraftClient.getInstance().player!!.age.toLong())
 
         // For now, we make a plot at 0,0 so that testing is easy
-        val plot = world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
+        val plot = contraption.plot
         val plotCenterBlockPos = BlockPos(plot.centerPos.x.toInt(), plot.centerPos.y.toInt(), plot.centerPos.z.toInt())
 
         stack.push() // Push into the plot
@@ -87,8 +83,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
             stack.push() // Push into the Section
 
-            val sectionYBottom = -15// world.bottomY
-            val sectionYTop = 15 //world.topY
+            val sectionYBottom = world.bottomY
+            val sectionYTop = world.topY
 
             val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
             val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)

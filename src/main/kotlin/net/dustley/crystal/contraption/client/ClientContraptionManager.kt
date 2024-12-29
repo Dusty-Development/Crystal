@@ -1,5 +1,6 @@
 package net.dustley.crystal.contraption.client
 
+import net.dustley.crystal.Crystal.LOGGER
 import net.dustley.crystal.api.math.Transform
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.contraption.Contraption
@@ -12,7 +13,7 @@ import physx.physics.PxShape
 import java.util.*
 
 class ClientContraptionManager(clientWorld: ClientWorld) : ContraptionManager(clientWorld as World) {
-    val renderSystem = ContraptionRenderSystem(clientWorld)
+    private val renderSystem = ContraptionRenderSystem(clientWorld)
     override val isClientSide: Boolean = true
 
     // ships are only to be created on the world.
@@ -28,39 +29,7 @@ class ClientContraptionManager(clientWorld: ClientWorld) : ContraptionManager(cl
         return contraption
     }
 
-    fun setupContraptionPhys(contraption: Contraption) {
-        val shape: PxShape = handler.createBox()
-        handler.createActor(contraption.uuid, contraption.transform, shape)
-    }
-
-    var mAccumulator = 0.0f
-    var mStepSize = 1.0f / 60.0f
-
-    //TODO: unjankify this
-    fun update(deltaTime: Double, context: WorldRenderContext) {
-        mAccumulator += deltaTime.toFloat()
-        if(mAccumulator > mStepSize) {
-            val scene = handler.scene
-            val actors = handler.actors
-
-            mAccumulator -= mStepSize + deltaTime.toFloat()
-
-            //LOGGER.info(mAccumulator.toString())
-
-            scene.simulate(mStepSize)
-
-            scene.fetchResults(true)
-            for (contraption: Contraption in contraptions.values) {
-                val actor = actors[contraption.uuid]
-
-                if (actor != null) {
-                    contraption.transform = actor.globalPose.toCrystal()
-
-//                    LOGGER.info(contraption.transform.position.toString())
-                }
-            }
-        }
-
+    override fun postUpdate(deltaTime: Double, context: WorldRenderContext) {
         renderSystem.updateAndRender(deltaTime, context)
     }
 
