@@ -74,7 +74,7 @@ class ScrapyardPlotManager (
 
     companion object {
         const val CHUNK_SIZE = 16 // blocks per chunk
-        const val PLOT_SIZE: Int = 2 // must a f(x) = 2^x
+        const val PLOT_SIZE: Int = 4 // must a f(x) = 2^x
         const val VOID_DIST: Int = 28672000
 
         /**

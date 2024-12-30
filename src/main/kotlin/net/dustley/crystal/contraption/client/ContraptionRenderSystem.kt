@@ -24,6 +24,7 @@ import org.joml.Quaternionf
 
 //https://github.com/ValkyrienSkies/Valkyrien-Skies-2/blob/1.18.x/main/common/src/main/java/org/valkyrienskies/mod/mixin/client/renderer/MixinLevelRenderer.java
 
+//org.valkyrienskies.mod.mixin.mod_compat.vanilla_renderer;
 class ContraptionRenderSystem(val world: ClientWorld) {
 
     fun updateAndRender(context: WorldRenderContext) {
@@ -69,7 +70,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         random.setSeed(MinecraftClient.getInstance().player!!.age.toLong())
 
         // For now, we make a plot at 0,0 so that testing is easy
-        val plot = contraption.plot //world.contraptionManager().scrapyard.getPlot(Vector2i(0,0), true)!!
+        val plot = contraption.plot// world.contraptionManager().scrapyard.getPlot(Vector2i(0,1), true)!!
         val plotCenterBlockPos = BlockPos(plot.centerPos.x.toInt(), plot.centerPos.y.toInt(), plot.centerPos.z.toInt())
 
         world.chunkManager.setChunkForced(plot.centerChunkPos, true)
@@ -239,9 +240,10 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
         // Draw the lines
         if (vertexConsumer != null) {
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
+            val length = 2.0
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(length,0.0,0.0), 1f, 0f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,length,0.0), 0f, 1f, 0f, 1f)
+            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,length), 0f, 0f, 1f, 1f)
         }
 
         stack.pop()

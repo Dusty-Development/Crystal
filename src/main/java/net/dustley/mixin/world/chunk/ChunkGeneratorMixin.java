@@ -22,8 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * <p> (thanks to VS2 for creating the original)
- * @author Dustley
+ * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(ChunkGenerator.class)
 public class ChunkGeneratorMixin {

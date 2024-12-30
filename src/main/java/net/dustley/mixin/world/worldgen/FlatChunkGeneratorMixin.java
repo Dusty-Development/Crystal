@@ -15,8 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * <p> (thanks to VS2 for creating the original)
- * @author Dustley
+ * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(FlatChunkGenerator.class)
 public class FlatChunkGeneratorMixin {

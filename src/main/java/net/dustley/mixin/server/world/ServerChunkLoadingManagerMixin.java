@@ -1,4 +1,4 @@
-package net.dustley.mixin.world;
+package net.dustley.mixin.server.world;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,14 +22,10 @@ public abstract class ServerChunkLoadingManagerMixin {
     @Shadow protected abstract NbtCompound updateChunkNbt(NbtCompound nbt);
 
     /**
-     * Force the game send chunk update packets to players watching ship chunks.
-     *
-     * <p> (thanks to Tri0de for creating the original)
-     * @author Dustley
+     * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
      */
     @Inject(method = "getPlayersWatchingChunk(Lnet/minecraft/util/math/ChunkPos;Z)Ljava/util/List;", at = @At("TAIL"), cancellable = true)
     private void postGetPlayersWatchingChunk(ChunkPos chunkPos, boolean onlyOnWatchDistanceEdge, CallbackInfoReturnable<List<ServerPlayerEntity>> cir) {
-
 
         final Iterator<ServerPlayerEntity> playersWatchingShipChunk = world.getPlayers().iterator();
         if (!playersWatchingShipChunk.hasNext()) {

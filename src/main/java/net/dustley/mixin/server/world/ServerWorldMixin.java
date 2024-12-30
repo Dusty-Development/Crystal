@@ -1,20 +1,22 @@
-package net.dustley.mixin.world;
+package net.dustley.mixin.server.world;
 
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.dustley.accessor.ContraptionManagerAccessor;
 import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.dustley.crystal.scrapyard.chunk.PlotUpdate;
+import net.dustley.mixin.accessor.ServerChunkLoadingManagerAccessor;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerChunkManager;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ChunkFilter;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.*;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
@@ -75,23 +77,36 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
     private void preTick(final BooleanSupplier shouldKeepTicking, final CallbackInfo ci) {
         final ServerWorld self = ServerWorld.class.cast(this);
         final ServerContraptionManager contraptionManager = crystal$getContraptionManager();
-//        final ServerChunkLoadingManager chunkLoadingManager = self.getChunkManager().chunkLoadingManager;
-//        final ServerChunkLoadingManagerAccessor chunkLoadingManagerAccessor = (ServerChunkLoadingManagerAccessor) chunkLoadingManager;
+        final ServerChunkLoadingManager chunkLoadingManager = self.getChunkManager().chunkLoadingManager;
+        final ServerChunkLoadingManagerAccessor chunkLoadingManagerAccessor = (ServerChunkLoadingManagerAccessor) chunkLoadingManager;
 
         contraptionManager.tick();
 
         // Create DenseVoxelShapeUpdate for new loaded chunks
         // Also mark the chunks as loaded in the ship objects
         final List<PlotUpdate> voxelShapeUpdates = new ArrayList<>();
-//        final ChunkTicketManagerAccessor ticketManager = (ChunkTicketManagerAccessor) (chunkLoadingManager.getTicketManager());
-
+        final ChunkTicketManager ticketManager = (ChunkTicketManager) (chunkLoadingManager.getTicketManager());
+        
         for (Contraption contraption : contraptionManager.getContraptions().values()) {
 //            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
 
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-//                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
+                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.SPAWN, chunkPosition);
+                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
                 self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-                self.getChunkManager().addTicket(ChunkTicketType.UNKNOWN, chunkPosition, 0, chunkPosition);
+                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 1, chunkPosition);
+                self.getChunkManager().addTicket(ChunkTicketType.UNKNOWN, chunkPosition, 4, chunkPosition);
+                self.getChunkManager().addTicket(ChunkTicketType.FORCED, chunkPosition, 4, chunkPosition);
+                self.getChunk(chunkPosition.x, chunkPosition.z);
+                self.getChunkManager().getChunk(chunkPosition.x, chunkPosition.z);
+                self.getChunkManager().getWorldChunk(chunkPosition.x, chunkPosition.z);
+                self.getChunkManager().chunkLoadingManager.acquire(chunkPosition.toLong());
+
+                for (ServerPlayerEntity player : self.getPlayers()) {
+                    chunkLoadingManager.sendWatchPackets(player);
+                    chunkLoadingManager.sendWatchPackets(player, ChunkFilter.cylindrical(chunkPosition, 1));
+                }
+
             }
 //            self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z);
         }

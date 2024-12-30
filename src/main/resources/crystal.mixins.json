@@ -5,16 +5,19 @@
   "mixins": [
     "accessor.ChunkTicketManagerAccessor",
     "accessor.ServerChunkLoadingManagerAccessor",
-    "world.ServerChunkLoadingManagerMixin",
-    "world.ServerWorldMixin",
+    "server.network.ServerPlayNetworkHandlerMixin",
+    "server.world.ServerChunkLoadingManagerEntityTrackerMixin",
+    "server.world.ServerChunkLoadingManagerMixin",
+    "server.world.ServerWorldMixin",
     "world.chunk.ChunkGeneratorMixin",
     "world.worldgen.FlatChunkGeneratorMixin",
     "world.worldgen.NoiseChunkGeneratorMixin"
   ],
   "client": [
-    "client.ClientWorldMixin",
-    "client.GameRendererMixin",
-    "client.WorldRendererMixin"
+    "client.render.GameRendererMixin",
+    "client.render.WorldRendererMixin",
+    "client.world.ClientChunkManagerMixin",
+    "client.world.ClientWorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1

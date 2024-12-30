@@ -1,4 +1,4 @@
-package net.dustley.mixin.client;
+package net.dustley.mixin.client.render;
 
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
