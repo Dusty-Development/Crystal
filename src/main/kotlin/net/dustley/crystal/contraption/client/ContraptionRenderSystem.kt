@@ -235,14 +235,14 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         val scale = 1.0
         val box = Box.of(Vec3d.ZERO, scale, scale, scale)
         val vertexConsumer = context.consumers()
-        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,0.75f)
+        DebugRenderer.drawBox(stack, vertexConsumer, box, 0.5f,0.5f,0.5f,1f)
 
         // Draw the lines
-        if (vertexConsumer != null) {
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
-            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
-        }
+//        if (vertexConsumer != null) {
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(1.0,0.0,0.0), 1f, 0f, 0f, 1f)
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,1.0,0.0), 0f, 1f, 0f, 1f)
+//            renderLine(vertexConsumer, stack, Vec3d.ZERO, Vec3d(0.0,0.0,1.0), 0f, 0f, 1f, 1f)
+//        }
 
         stack.pop()
     }

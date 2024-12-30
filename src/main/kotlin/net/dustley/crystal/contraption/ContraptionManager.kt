@@ -39,6 +39,7 @@ abstract class ContraptionManager(val world: World) {
      * Runs every game tick
      */
     fun tick() {
+        handler.tick(world)
         //update contraption shape
         //do tick based events such as plant growth or breaking a block
     }
