@@ -71,17 +71,17 @@ class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManage
 //        }
     }
 
-    data class ContraptionSaveData(val data: HashMap<UUID, Pair<ScrapyardPlot, PhysXHandler.ActorData>>) :  PersistentState() {
-
-        override fun writeNbt(nbt: NbtCompound?, registryLookup: RegistryWrapper.WrapperLookup?): NbtCompound {
-            TODO("Not yet implemented")
-        }
-
-        companion object {
-            fun deserializer(nbt: NbtCompound, wrapper: RegistryWrapper.WrapperLookup): ContraptionSaveData {
-
-            }
-        }
-    }
+//    data class ContraptionSaveData(val data: HashMap<UUID, Pair<ScrapyardPlot, PhysXHandler.ActorData>>) :  PersistentState() {
+//
+//        override fun writeNbt(nbt: NbtCompound?, registryLookup: RegistryWrapper.WrapperLookup?): NbtCompound {
+//            TODO("Not yet implemented")
+//        }
+//
+//        companion object {
+//            fun deserializer(nbt: NbtCompound, wrapper: RegistryWrapper.WrapperLookup): ContraptionSaveData {
+//
+//            }
+//        }
+//    }
 
 }
