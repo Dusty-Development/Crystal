@@ -4,9 +4,7 @@ import net.dustley.crystal.Crystal
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.contraption.physics.PhysXHandler
 import net.dustley.crystal.scrapyard.ScrapyardPlotManager
-import net.dustley.crystal.scrapyard.chunk.PlotUpdate
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.ChunkPos
@@ -39,6 +37,7 @@ abstract class ContraptionManager(val world: World) {
      * Runs every game tick
      */
     fun tick() {
+        handler.tick(world)
         //update contraption shape
         //do tick based events such as plant growth or breaking a block
     }
@@ -60,7 +59,7 @@ abstract class ContraptionManager(val world: World) {
 
             scene.fetchResults(true)
             for (contraption: Contraption in contraptions.values) {
-                val actor = handler.actors[contraption.uuid]
+                val actor = handler.actorData[contraption.uuid]
 
                 if(actor != null) {
                     contraption.transform = actor.actor.globalPose.toCrystal()
@@ -103,27 +102,6 @@ abstract class ContraptionManager(val world: World) {
     fun getContraptionManagingPos(blockPos: BlockPos) : Contraption? {
         val scrapyardPlot = scrapyard.getPlot(ChunkPos(blockPos))
         return scrapyardPlot?.controllingContraptionPart
-    }
-
-    // DATA MANAGEMENT \\
-    fun saveContraptions() {
-//        val data = NbtCompound()
-//        contraptions.forEach { (id, contraption) ->
-//            data.put(id.toString(), contraption.toNbt())
-//        }
-//        world.persistentStateManager.getOrCreate(
-//            { ContraptionSaveData(data) },
-//            "contraptions"
-//        ).markDirty()
-    }
-
-    fun loadContraptions() {
-//        val savedData = world.persistentStateManager.get<ContraptionSaveData>("contraptions")
-//        savedData?.data?.keys?.forEach { key ->
-//            val id = UUID.fromString(key)
-//            val contraption = Contraption.fromNbt(savedData.data.getCompound(key))
-//            contraptions[id] = contraption
-//        }
     }
 
 }

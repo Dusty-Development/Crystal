@@ -1,17 +1,13 @@
 package net.dustley.crystal.contraption.client
 
-import net.dustley.crystal.Crystal.LOGGER
 import net.dustley.crystal.api.contraption.contraptionManager
 import net.dustley.crystal.api.math.Transform
-import net.dustley.crystal.api.math.toCrystal
-import net.dustley.crystal.contraption.Contraption
 import net.dustley.crystal.contraption.ContraptionManager
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Text
 import net.minecraft.world.World
 import org.joml.Vector2i
-import physx.physics.PxShape
 import java.util.*
 
 class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManager(clientWorld as World) {
@@ -28,7 +24,7 @@ class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManage
         setupContraptionPhys(contraption)
 
         clientWorld.players.forEach{
-            it.sendMessage(Text.literal(world.contraptionManager().handler.actors.size.toString()))
+            it.sendMessage(Text.literal(world.contraptionManager().handler.actorData.size.toString()))
         }
         println("CREATED CLIENT CONTRAPTION WITH COUNT: ${contraptions.size}")
         return contraption
@@ -38,4 +34,10 @@ class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManage
         renderSystem.updateAndRender(context)
     }
 
+    // DATA MANAGEMENT //
+//    fun saveContraptions() {
+//    }
+//
+//    fun loadContraptions() {
+//    }
 }
