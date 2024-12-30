@@ -35,31 +35,14 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
         world.contraptionManager().contraptions.forEach { uuid, contraption ->
             (contraption as ClientContraption)
-            renderContraption(contraption, context)
-            contraption.render(context)
+            contraption.render(context, this)
         }
 
         stack.pop()
     }
 
-    private fun renderContraption(contraption: ClientContraption, context: WorldRenderContext) {
-        val stack = context.matrixStack() ?: return
-        stack.push()
 
-        val transform = contraption.contraptionManager.handler.fetch(contraption.uuid)
-        val position = transform.position
-        stack.translate(position.x, position.y, position.z)
-        stack.multiply(Quaternionf(transform.rotation))
-
-        stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
-
-        renderChunks(contraption, stack, context)
-        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context)
-
-        stack.pop()
-    }
-
-    private fun renderChunks(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
+    fun renderChunks(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
 
         val world: ClientWorld = context.world()
         val consumers: VertexConsumerProvider = context.consumers()!!
@@ -124,83 +107,85 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.pop() // Pop out of the plot
     }
 
-//            // Do some section math so that we don't need to render as many blocks
-//            for (sectionIndex in chunk.sectionArray.indices) { // chunk.sectionArray.indices
-//                val section = chunk.getSection(sectionIndex)
+//    {            // Do some section math so that we don't need to render as many blocks
+//        for (sectionIndex in chunk.sectionArray.indices) { // chunk.sectionArray.indices
+//            val section = chunk.getSection(sectionIndex)
 //
-//                if(section.isEmpty) break // Cancel if the vertical slice is empty
+//            if (section.isEmpty) break // Cancel if the vertical slice is empty
 //
-//                stack.push() // Push into the Section
+//            stack.push() // Push into the Section
 //
-//                val sectionYBottom = chunk.bottomY + (sectionIndex * 16)
-//                val sectionYTop = sectionYBottom + 16
+//            val sectionYBottom = chunk.bottomY + (sectionIndex * 16)
+//            val sectionYTop = sectionYBottom + 16
 //
-//                val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
-//                val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)
+//            val minBlockPos = chunkPos.getBlockPos(0, 0, 0).withY(sectionYBottom)
+//            val maxBlockPos = chunkPos.getBlockPos(15, 0, 15).withY(sectionYTop)
 //
-//                for (xPos in minBlockPos.x..maxBlockPos.x) {
-//                    for (zPos in minBlockPos.z..maxBlockPos.z) {
-//                        for (yPos in minBlockPos.y..maxBlockPos.y) {
+//            for (xPos in minBlockPos.x..maxBlockPos.x) {
+//                for (zPos in minBlockPos.z..maxBlockPos.z) {
+//                    for (yPos in minBlockPos.y..maxBlockPos.y) {
 //
-//                            val blockPos = BlockPos(xPos, yPos, zPos) // The block in world space (the very large number one)
-//                            val blockState = world.getBlockState(blockPos)
+//                        val blockPos =
+//                            BlockPos(xPos, yPos, zPos) // The block in world space (the very large number one)
+//                        val blockState = world.getBlockState(blockPos)
 //
-//                            if(blockState.isAir) break // Skip air blocks
+//                        if (blockState.isAir) break // Skip air blocks
 //
-//                            val renderLayer = RenderLayers.getBlockLayer(blockState)
-//                            val vertexConsumer = consumers.getBuffer(renderLayer)
-//                            val offsetPosition = blockPos.subtract(plotCenterBlockPos).toCenterPos()
+//                        val renderLayer = RenderLayers.getBlockLayer(blockState)
+//                        val vertexConsumer = consumers.getBuffer(renderLayer)
+//                        val offsetPosition = blockPos.subtract(plotCenterBlockPos).toCenterPos()
 //
-//                            stack.push() // Push into the block
+//                        stack.push() // Push into the block
 //
-//                            stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
-//                            blockRenderManager.renderBlock(blockState, blockPos, world, stack, vertexConsumer, true, random)
+//                        stack.translate(offsetPosition.x, offsetPosition.y, offsetPosition.z)
+//                        blockRenderManager.renderBlock(blockState, blockPos, world, stack, vertexConsumer, true, random)
 //
-//                            stack.pop() // Pop out of the block
+//                        stack.pop() // Pop out of the block
 //
-//                        }
 //                    }
 //                }
-//                stack.pop() // Pop out of the section
 //            }
-
-//    private fun afterSetup(worldRenderContext: WorldRenderContext) {
-//        val world = worldRenderContext.world()
-//        val consumers = worldRenderContext.consumers()
-//        val client = MinecraftClient.getInstance()
-//        val blockRenderManager = client.blockRenderManager
-//        val random = Random.create()
-//        val matrixStack = MatrixStack()
+//            stack.pop() // Pop out of the section
+//        }
 //
-//        matrixStack.push()
+//        private fun afterSetup(worldRenderContext: WorldRenderContext) {
+//            val world = worldRenderContext.world()
+//            val consumers = worldRenderContext.consumers()
+//            val client = MinecraftClient.getInstance()
+//            val blockRenderManager = client.blockRenderManager
+//            val random = Random.create()
+//            val matrixStack = MatrixStack()
 //
-//        val camera = worldRenderContext.camera()
-//        matrixStack.translate(camera.pos.negate())
+//            matrixStack.push()
 //
-//        val blockPos = BlockPos(0, -55, 0)
-//        val chunkPos = ChunkPos.fromRegion(blockPos.x, blockPos.z)
+//            val camera = worldRenderContext.camera()
+//            matrixStack.translate(camera.pos.negate())
 //
-//        val vec3dWithView = Vec3d(blockPos)
-//        matrixStack.translate(vec3dWithView)
-//        matrixStack.translate(0f, 1f, 0f)
-//        matrixStack.translate(0.0, MathHelper.sin(client.player!!.age / 10f) * 0.2, 0.0)
-//        matrixStack.scale(0.2f, 0.2f, 0.2f)
-//        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(client.player!!.age / 4f))
-//        matrixStack.translate(-chunkPos.centerX.toFloat(), 0f, -chunkPos.centerZ.toFloat())
+//            val blockPos = BlockPos(0, -55, 0)
+//            val chunkPos = ChunkPos.fromRegion(blockPos.x, blockPos.z)
 //
-//        for (xPos in chunkPos.startX..chunkPos.endX) {
-//            for (zPos in chunkPos.startZ..chunkPos.endZ) {
+//            val vec3dWithView = Vec3d(blockPos)
+//            matrixStack.translate(vec3dWithView)
+//            matrixStack.translate(0f, 1f, 0f)
+//            matrixStack.translate(0.0, MathHelper.sin(client.player!!.age / 10f) * 0.2, 0.0)
+//            matrixStack.scale(0.2f, 0.2f, 0.2f)
+//            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(client.player!!.age / 4f))
+//            matrixStack.translate(-chunkPos.centerX.toFloat(), 0f, -chunkPos.centerZ.toFloat())
+//
+//            for (xPos in chunkPos.startX..chunkPos.endX) {
+//                for (zPos in chunkPos.startZ..chunkPos.endZ) {
 ////                for (int yPos = -64; yPos < 319; yPos++) {
-//                for (yPos in -64 until -40) {
-//                    val blockPos1 = BlockPos(xPos, yPos, zPos)
-//                    val blockState = world.getBlockState(blockPos1)
-//                    val renderLayer = RenderLayers.getBlockLayer(blockState)
-//                    val buffer = consumers!!.getBuffer(renderLayer)
-//                    val vec3d = Vec3d(blockPos1.subtract(blockPos))
-//                    matrixStack.push()
-//                    matrixStack.translate(vec3d)
-//                    blockRenderManager.renderBlock(blockState, blockPos1, world, matrixStack, buffer, true, random)
-//                    matrixStack.pop()
+//                    for (yPos in -64 until -40) {
+//                        val blockPos1 = BlockPos(xPos, yPos, zPos)
+//                        val blockState = world.getBlockState(blockPos1)
+//                        val renderLayer = RenderLayers.getBlockLayer(blockState)
+//                        val buffer = consumers!!.getBuffer(renderLayer)
+//                        val vec3d = Vec3d(blockPos1.subtract(blockPos))
+//                        matrixStack.push()
+//                        matrixStack.translate(vec3d)
+//                        blockRenderManager.renderBlock(blockState, blockPos1, world, matrixStack, buffer, true, random)
+//                        matrixStack.pop()
+//                    }
 //                }
 //            }
 //        }
