@@ -23,7 +23,7 @@ import physx.physics.PxGeomRaycastHit
 import physx.physics.PxHitFlags
 import kotlin.math.max
 
-class ContraptionGeometryCallback(val contraption: Contraption, val plot: ScrapyardPlot)
+class ContraptionGeometryCallback(val contraption: Contraption)
     :  SimpleCustomGeometryCallbacksImpl() {
 
     val AAbounds: PxBounds3
@@ -31,7 +31,7 @@ class ContraptionGeometryCallback(val contraption: Contraption, val plot: Scrapy
         var min = BlockPos(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
         var max = BlockPos(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
         var maxH = -63L
-        for (chunkPos in plot.controlledChunkPositions) {
+        for (chunkPos in contraption.plot.controlledChunkPositions) {
             val chunkHeight = contraption.contraptionManager.world.chunkManager.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false)
             if (chunkHeight != null) {
                 if (chunkPos.startPos < min) min = chunkPos.startPos
@@ -46,7 +46,7 @@ class ContraptionGeometryCallback(val contraption: Contraption, val plot: Scrapy
 
     override fun raycastImpl(
         origin: PxVec3?,
-        unitDir: PxVec3?,
+        dir: PxVec3?,
         geom: PxGeometry?,
         pose: PxTransform?,
         maxDist: Float,
@@ -55,16 +55,28 @@ class ContraptionGeometryCallback(val contraption: Contraption, val plot: Scrapy
         rayHits: PxGeomRaycastHit?,
         stride: Int
     ): Int {
-//        if(
-//            origin != null &&
-//            unitDir != null &&
-////            geom != null && always based on plot
-//            pose != null &&
-//            hitFlags != null &&
-//            rayHits != null) {
-//            return 1
-//        }
-//        return 0
+        if(
+            origin != null &&
+            dir != null &&
+//            geom != null && always based on plot
+            pose != null &&
+            hitFlags != null &&
+            rayHits != null) {
+            val  transform = pose.toCrystal().getMatrix4d().invert()
+            val result = contraption.contraptionManager.world.raycast(RaycastContext(
+                transform.transformPosition(origin.toJOMLD()).toMinecraft(),
+                dir.toMC(),
+                ShapeType.COLLIDER,
+                RaycastContext.FluidHandling.NONE,
+                ShapeContext.absent()
+            ))
+            if(result.type  == HitResult.Type.BLOCK) {
+                rayHits.normal = pose.toCrystal().getMatrix4d().transformPosition(result.side.vector.toJOMLD()).toPx()
+                rayHits.distance = result.pos.distanceTo(origin.toMC()).toFloat()
+                rayHits.position = origin.toMC().relativize( result.pos).normalize().toJOML().toPx()
+                return 1
+            }
+        }
         return 0
     }
 

@@ -6,12 +6,14 @@ import net.dustley.crystal.Crystal.version
 import net.dustley.crystal.api.math.Transform
 import net.dustley.crystal.api.math.toCrystal
 import net.dustley.crystal.api.math.toJOMLD
+import net.dustley.crystal.contraption.Contraption
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.Box
 import net.minecraft.world.World
 import physx.PxTopLevelFunctions
 import physx.common.*
 import physx.geometry.PxBoxGeometry
+import physx.geometry.PxCustomGeometry
 import physx.geometry.PxGeometryQuery
 import physx.physics.*
 import java.util.*
@@ -50,12 +52,15 @@ class PhysXHandler(threads: Int = 4, val world: World) {
         tolerances.destroy()
     }
 
-    fun createActor(id: UUID,  pose: Transform,  shape: PxShape): PxRigidDynamic {
-        val body = physics.createRigidDynamic(pose.toPx())
+    fun createActor(contraption: Contraption): PxRigidDynamic {
+        val body = physics.createRigidDynamic(contraption.transform.toPx())
+        val callback: ContraptionGeometryCallback = ContraptionGeometryCallback(contraption)
+        val material = physics.createMaterial(.5f, .5f, .1f)
+        val shape = physics.createShape(PxCustomGeometry(callback), material)
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actorData[id] = ActorData(body, shape, physics.createMaterial(.5f, .5f, .5f)) //TODO: remove hotfic material
+        actorData[contraption.uuid] = ActorData(body, shape, material) //TODO: remove hotfic material
         return body
     }
 
@@ -90,25 +95,20 @@ class PhysXHandler(threads: Int = 4, val world: World) {
 
     fun tick() {
         for(player in this.world.players) {
-            val data =  terrainData.computeIfAbsent(player) { a ->
+            terrainData.computeIfAbsent(player) { a ->
                 val actor = physics.createRigidStatic(Transform(player.blockPos.withY(-61).toJOMLD()).toPx())
-                val shape = physics.createShape(PxBoxGeometry(100f, 1f, 100f),  physics.createMaterial(.5f, .5f, .5f))
+                val callback = TerrainGeometryCallback(this.world, listOf())
+
+                val shape = physics.createShape(PxCustomGeometry(callback),  physics.createMaterial(.5f, .5f, 0f))
                 shape.simulationFilterData = filterData
                 actor.attachShape(shape)
                 scene.addActor(actor)
-                TerrainData(TerrainGeometryCallback(this.world, listOf()), shape,  actor)
+                TerrainData(callback, shape,  actor)
             }
 
-            val actor = data.actor
-
-//            val callback = TerrainGeometry(world, world.chunkManager)
-//            val shape = PxBoxGeometry(100f, 1f, 100f)
+//            val actor = data.actor
 //
-//            actor.detachShape(data.shape)
-//            data.shape = shape
-//            actor.attachShape(shape)
-
-            actor.setGlobalPose(Transform(player.blockPos.withY(-61).toJOMLD()).toPx(), true)
+//            actor.setGlobalPose(Transform(player.blockPos.withY(-61).toJOMLD()).toPx(), true)
         }
     }
 
