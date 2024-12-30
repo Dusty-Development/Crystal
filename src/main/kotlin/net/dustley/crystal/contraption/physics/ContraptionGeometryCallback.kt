@@ -2,17 +2,13 @@ package net.dustley.crystal.contraption.physics
 
 import net.dustley.crystal.api.math.*
 import net.dustley.crystal.contraption.Contraption
-import net.dustley.crystal.scrapyard.ScrapyardPlot
 import net.minecraft.block.ShapeContext
 import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.Heightmap
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.RaycastContext.ShapeType
-import net.minecraft.world.World
-import net.minecraft.world.chunk.Chunk
 import net.minecraft.world.chunk.ChunkStatus
-import org.joml.Vector4f
 import physx.common.PxBounds3
 import physx.common.PxTransform
 import physx.common.PxVec3
@@ -26,7 +22,7 @@ import kotlin.math.max
 class ContraptionGeometryCallback(val contraption: Contraption)
     :  SimpleCustomGeometryCallbacksImpl() {
 
-    val AAbounds: PxBounds3
+    private val plotBounds: PxBounds3
     init {
         var min = BlockPos(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
         var max = BlockPos(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
@@ -41,7 +37,7 @@ class ContraptionGeometryCallback(val contraption: Contraption)
                 }
             }
         }
-        AAbounds = PxBounds3(min.withY(-64).toJOMLD().toPx(), max.withY(maxH.toInt()).toJOMLD().toPx())
+        plotBounds = PxBounds3(min.withY(-64).toJOMLD().toPx(), max.withY(maxH.toInt()).toJOMLD().toPx())
     }
 
     override fun raycastImpl(
@@ -95,7 +91,7 @@ class ContraptionGeometryCallback(val contraption: Contraption)
         return true
     }
 
-    override fun getLocalBoundsImpl(geometry: PxGeometry?): PxBounds3 = contraption.transform.transformAABB(AAbounds.toMC()).toPx()
+    override fun getLocalBoundsImpl(geometry: PxGeometry?): PxBounds3 = contraption.transform.transformAABB(plotBounds.toMC()).toPx()
 
 //    override fun overlapImpl( //TODO: redo after ContraptionGeometry is done
 //        geom0: PxGeometry?,

@@ -69,9 +69,8 @@ class TerrainGeometryCallback(val world: World, val chunks: List<Chunk>)
                 rayHits.normal = result.side.vector.toJOMLD().toPx() //TODO: add MC to Px
                 rayHits.distance = result.pos.distanceTo(origin.toMC()).toFloat()
                 rayHits.position = result.pos.toJOML().toPx()
-                return 0
+                return 1
             }
-            return 1
         }
         return 0
     }
