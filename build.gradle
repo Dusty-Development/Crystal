@@ -35,7 +35,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
 
 	// java bindings
-	implementation("de.fabmax:physx-jni:2.4.2")
+	implementation("de.fabmax:physx-jni:${project.phys_version}")
 
 	// native libraries - you can add the one matching your system or all
 	runtimeOnly("de.fabmax:physx-jni:${project.phys_version}:natives-windows")
