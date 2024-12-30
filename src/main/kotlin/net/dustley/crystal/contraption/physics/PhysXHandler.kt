@@ -12,7 +12,7 @@ import net.minecraft.world.World
 import physx.PxTopLevelFunctions
 import physx.common.*
 import physx.geometry.PxBoxGeometry
-import physx.geometry.PxGeometry
+import physx.geometry.PxGeometryQuery
 import physx.physics.*
 import java.util.*
 import kotlin.collections.HashMap
@@ -89,14 +89,14 @@ class PhysXHandler(threads: Int = 4, val world: World) {
     }
 
     fun tick() {
-        for(player in world.players) {
+        for(player in this.world.players) {
             val data =  terrainData.computeIfAbsent(player) { a ->
                 val actor = physics.createRigidStatic(Transform(player.blockPos.withY(-61).toJOMLD()).toPx())
                 val shape = physics.createShape(PxBoxGeometry(100f, 1f, 100f),  physics.createMaterial(.5f, .5f, .5f))
                 shape.simulationFilterData = filterData
                 actor.attachShape(shape)
                 scene.addActor(actor)
-                TerrainData(TerrainGeometryCallback(world, world.chunkManager), shape,  actor)
+                TerrainData(TerrainGeometryCallback(this.world, listOf()), shape,  actor)
             }
 
             val actor = data.actor

@@ -2,6 +2,7 @@ package net.dustley.crystal.api.math
 
 import net.minecraft.util.math.*
 import org.joml.*
+import physx.common.PxBounds3
 
 // I STRAIGHT UP STOLE THIS FROM VS2, So thank you "org.valkyrienskies.mod.common.util" and whoever wrote it.
 // - dust
@@ -87,3 +88,5 @@ fun Quaterniondc.toFloat() = Quaternionf(x(), y(), z(), w())
 
 fun ChunkPos.toJOML() = Vector2i(this.x, this.z)
 // endregion
+
+fun Box.toPx() = PxBounds3(this.minPos.toVector3f().toPx(), this.maxPos.toVector3f().toPx())

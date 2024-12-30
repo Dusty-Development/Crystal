@@ -37,7 +37,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         world.contraptionManager().contraptions.forEach { uuid, contraption ->
             (contraption as ClientContraption)
             renderContraption(contraption, context)
-            contraption.render(context)
+            contraption.render(context, this)
         }
 
         stack.pop()
@@ -47,7 +47,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         val stack = context.matrixStack() ?: return
         stack.push()
 
-        val transform = contraption.contraptionManager.handler.fetch(contraption.uuid)
+        val transform = contraption.contraptionManager.handler.getTransform(contraption.uuid)
         val position = transform.position
         stack.translate(position.x, position.y, position.z)
         stack.multiply(Quaternionf(transform.rotation))
@@ -60,7 +60,7 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.pop()
     }
 
-    private fun renderChunks(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
+    fun renderChunks(contraption: ClientContraption, stack: MatrixStack, context: WorldRenderContext) {
 
         val world: ClientWorld = context.world()
         val consumers: VertexConsumerProvider = context.consumers()!!
