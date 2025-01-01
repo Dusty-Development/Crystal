@@ -3,19 +3,24 @@ package net.dustley.crystal.contraption.physics
 import net.dustley.crystal.Crystal.LOGGER
 import net.dustley.crystal.Crystal.foundation
 import net.dustley.crystal.Crystal.version
-import net.dustley.crystal.api.math.Transform
-import net.dustley.crystal.api.math.toCrystal
-import net.dustley.crystal.api.math.toJOMLD
+import net.dustley.crystal.api.math.*
+import net.dustley.crystal.contraption.Contraption
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
+import net.minecraft.util.math.Vec3d
+import net.minecraft.world.Heightmap
 import net.minecraft.world.World
+import net.minecraft.world.chunk.ChunkStatus
 import physx.PxTopLevelFunctions
-import physx.common.PxDefaultCpuDispatcher
-import physx.common.PxTolerancesScale
-import physx.common.PxVec3
+import physx.common.*
 import physx.geometry.PxBoxGeometry
+import physx.geometry.PxCustomGeometry
+import physx.geometry.PxGeometryQuery
 import physx.physics.*
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.math.max
 
 
 class PhysXHandler(threads: Int = 4, val world: World) {
@@ -40,7 +45,7 @@ class PhysXHandler(threads: Int = 4, val world: World) {
 
         // create a physics scene
         val sceneDesc = PxSceneDesc(tolerances)
-        sceneDesc.gravity = PxVec3(0f, -0f, 0f)
+        sceneDesc.gravity = PxVec3(0f, -9.8f, 0f)
         sceneDesc.cpuDispatcher = dispatcher
         sceneDesc.filterShader = PxTopLevelFunctions.DefaultFilterShader()
         scene = physics.createScene(sceneDesc)
@@ -50,17 +55,35 @@ class PhysXHandler(threads: Int = 4, val world: World) {
         tolerances.destroy()
     }
 
-    fun createActor(id: UUID,  pose: Transform,  shape: PxShape): PxRigidDynamic {
-        val body = physics.createRigidDynamic(pose.toPx())
+    fun createActor(contraption: Contraption): PxRigidDynamic {
+        //val callback = ContraptionGeometryCallback(contraption)
+        val material = physics.createMaterial(.5f, .5f, .1f)
+        //val shape = physics.createShape(PxCustomGeometry(callback), material)
+        var min = BlockPos(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
+        var max = BlockPos(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+        var maxH = -63L
+        for (chunkPos in contraption.plot.controlledChunkPositions) {
+            val chunkHeight = contraption.contraptionManager.world.chunkManager.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false)
+            if (chunkHeight != null) {
+                if (chunkPos.startPos < min) min = chunkPos.startPos
+                if (chunkPos.getBlockPos(15, 0, 15) > max) max = chunkPos.getBlockPos(15, 0, 15)
+                for (height in chunkHeight.getHeightmap(Heightmap.Type.WORLD_SURFACE).asLongArray()) {
+                    maxH = max(maxH, height)
+                }
+            }
+        }
+        val body = physics.createRigidDynamic(contraption.transform.toPx())
+        val aabb = Box(min.withY(-64).toDoubles(), max.withY(maxH.toInt()).toDoubles().add(Vec3d(1.0,1.0,1.0)))
+        val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), material)
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actorData[id] = ActorData(body, shape, physics.createMaterial(.5f, .5f, .5f)) //TODO: remove hotfic material
+        actorData[contraption.uuid] = ActorData(body, shape, material)
         return body
     }
 
     fun createBoxActor(id: UUID,  pose: Transform,  aabb: Box): PxRigidDynamic {
-        val material = physics.createMaterial(.5f, .5f, .02f)
+        val material = physics.createMaterial(.5f, .5f, .5f)
         val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), material, true, shapeFlags)
         val body = physics.createRigidDynamic(pose.toPx())
         shape.simulationFilterData = filterData
@@ -89,26 +112,24 @@ class PhysXHandler(threads: Int = 4, val world: World) {
     }
 
     fun tick() {
-        for(player in world.players) {
-            val data =  terrainData.computeIfAbsent(player) { a ->
+        for(player in this.world.players) {
+            terrainData.computeIfAbsent(player) { a ->
                 val actor = physics.createRigidStatic(Transform(player.blockPos.withY(-61).toJOMLD()).toPx())
-                val shape = physics.createShape(PxBoxGeometry(100f, 1f, 100f),  physics.createMaterial(.5f, .5f, .5f))
+                val callback = TerrainGeometryCallback(this.world, listOf())
+
+                val shape = physics.createShape(
+                    //PxCustomGeometry(callback),
+                    PxBoxGeometry(100f, 1f, 100f),
+                    physics.createMaterial(.5f, .5f, 0f))
                 shape.simulationFilterData = filterData
                 actor.attachShape(shape)
                 scene.addActor(actor)
-                TerrainData(TerrainGeometryCallback(world, world.chunkManager), shape,  actor)
+                TerrainData(callback, shape,  actor)
             }
 
-            val actor = data.actor
-
-//            val callback = TerrainGeometry(world, world.chunkManager)
-//            val shape = PxBoxGeometry(100f, 1f, 100f)
+//            val actor = data.actor
 //
-//            actor.detachShape(data.shape)
-//            data.shape = shape
-//            actor.attachShape(shape)
-
-            actor.setGlobalPose(Transform(player.blockPos.withY(-61).toJOMLD()).toPx(), true)
+//            actor.setGlobalPose(Transform(player.blockPos.withY(-61).toJOMLD()).toPx(), true)
         }
     }
 

@@ -59,7 +59,7 @@ class ServerContraptionManager(val serverWorld: ServerWorld) : ContraptionManage
 //            }
 //        }
 //        serverWorld.persistentStateManager.getOrCreate(PersistentState.Type( { ContraptionSaveData(data) }, ContraptionSaveData::deserializer, DataFixTypes.LEVEL), "contraptions")
-        handler.release()
+//        handler.release()
     }
 
     fun loadContraptions() {

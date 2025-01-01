@@ -1,17 +1,14 @@
 package net.dustley.crystal.contraption.physics
 
-import net.dustley.crystal.api.math.toJOML
-import net.dustley.crystal.api.math.toJOMLD
-import net.dustley.crystal.api.math.toMC
-import net.dustley.crystal.api.math.toPx
+import net.dustley.crystal.api.math.*
+import net.dustley.crystal.contraption.Contraption
 import net.minecraft.block.ShapeContext
 import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.Heightmap
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.RaycastContext.ShapeType
-import net.minecraft.world.World
-import net.minecraft.world.chunk.Chunk
+import net.minecraft.world.chunk.ChunkStatus
 import physx.common.PxBounds3
 import physx.common.PxTransform
 import physx.common.PxVec3
@@ -22,27 +19,30 @@ import physx.physics.PxGeomRaycastHit
 import physx.physics.PxHitFlags
 import kotlin.math.max
 
-class TerrainGeometryCallback(val world: World, val chunks: List<Chunk>)
+class ContraptionGeometryCallback(val contraption: Contraption)
     :  SimpleCustomGeometryCallbacksImpl() {
 
-        val bounds: PxBounds3
-        init {
-            var min = BlockPos(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
-            var max = BlockPos(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
-            var maxH = -63L
-            for (chunk in chunks) {
-                if( chunk.pos.startPos < min) min = chunk.pos.startPos
-                if( chunk.pos.getBlockPos(15, 0, 15) >  max) max = chunk.pos.getBlockPos(15, 0, 15)
-                for(height in chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).asLongArray()) {
+    private val plotBounds: PxBounds3
+    init {
+        var min = BlockPos(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
+        var max = BlockPos(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+        var maxH = -63L
+        for (chunkPos in contraption.plot.controlledChunkPositions) {
+            val chunkHeight = contraption.contraptionManager.world.chunkManager.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false)
+            if (chunkHeight != null) {
+                if (chunkPos.startPos < min) min = chunkPos.startPos
+                if (chunkPos.getBlockPos(15, 0, 15) > max) max = chunkPos.getBlockPos(15, 0, 15)
+                for (height in chunkHeight.getHeightmap(Heightmap.Type.WORLD_SURFACE).asLongArray()) {
                     maxH = max(maxH, height)
                 }
             }
-            bounds = PxBounds3(min.withY(-64).toJOMLD().toPx(), max.withY(maxH.toInt()).toJOMLD().toPx())
         }
+        plotBounds = PxBounds3(min.withY(-64).toJOMLD().toPx(), max.withY(maxH.toInt()).toJOMLD().toPx())
+    }
 
     override fun raycastImpl(
         origin: PxVec3?,
-        unitDir: PxVec3?,
+        dir: PxVec3?,
         geom: PxGeometry?,
         pose: PxTransform?,
         maxDist: Float,
@@ -53,22 +53,23 @@ class TerrainGeometryCallback(val world: World, val chunks: List<Chunk>)
     ): Int {
         if(
             origin != null &&
-            unitDir != null &&
-            //geom != null && geom is always world
-            //pose != null && pose is always identity
+            dir != null &&
+//            geom != null && always based on plot
+            pose != null &&
             hitFlags != null &&
             rayHits != null) {
-            val ctx = RaycastContext(
-                origin.toMC(),
-                origin.toMC().add(unitDir.toMC().multiply(maxDist.toDouble())),
+            val  transform = pose.toCrystal().getMatrix4d().invert()
+            val result = contraption.contraptionManager.world.raycast(RaycastContext(
+                transform.transformPosition(origin.toJOMLD()).toMinecraft(),
+                dir.toMC(),
                 ShapeType.COLLIDER,
                 RaycastContext.FluidHandling.NONE,
-                ShapeContext.absent())
-           val result =  world.raycast(ctx)
-            if (result.type !=  HitResult.Type.BLOCK ) {
-                rayHits.normal = result.side.vector.toJOMLD().toPx() //TODO: add MC to Px
+                ShapeContext.absent()
+            ))
+            if(result.type  == HitResult.Type.BLOCK) {
+                rayHits.normal = pose.toCrystal().getMatrix4d().transformPosition(result.side.vector.toJOMLD()).toPx()
                 rayHits.distance = result.pos.distanceTo(origin.toMC()).toFloat()
-                rayHits.position = result.pos.toJOML().toPx()
+                rayHits.position = origin.toMC().relativize( result.pos).normalize().toJOML().toPx()
                 return 1
             }
         }
@@ -90,7 +91,7 @@ class TerrainGeometryCallback(val world: World, val chunks: List<Chunk>)
         return true
     }
 
-    override fun getLocalBoundsImpl(geometry: PxGeometry?): PxBounds3 = bounds
+    override fun getLocalBoundsImpl(geometry: PxGeometry?): PxBounds3 = contraption.transform.transformAABB(plotBounds.toMC()).toPx()
 
 //    override fun overlapImpl( //TODO: redo after ContraptionGeometry is done
 //        geom0: PxGeometry?,
