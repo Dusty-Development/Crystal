@@ -6,12 +6,16 @@ import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.dustley.crystal.scrapyard.chunk.PlotUpdate;
 import net.dustley.mixin.accessor.ServerChunkLoadingManagerAccessor;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.network.ChunkFilter;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.*;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.chunk.Chunk;
@@ -21,6 +25,7 @@ import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.spongepowered.asm.mixin.Final;
@@ -39,9 +44,12 @@ import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerWorld.class)
-public class ServerWorldMixin implements ContraptionManagerAccessor {
+public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
     @Shadow @Final private ServerChunkManager chunkManager;
     @Shadow @Final private MinecraftServer server;
+
+    @Shadow public abstract void playSound(@Nullable PlayerEntity source, double x, double y, double z, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed);
+
     @Unique private ServerContraptionManager contraptionManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -86,76 +94,32 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
         // Also mark the chunks as loaded in the ship objects
         final List<PlotUpdate> voxelShapeUpdates = new ArrayList<>();
         final ChunkTicketManager ticketManager = (ChunkTicketManager) (chunkLoadingManager.getTicketManager());
-        
-        for (Contraption contraption : contraptionManager.getContraptions().values()) {
-//            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
 
+        for (Contraption contraption : contraptionManager.getContraptions().values()) {
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.SPAWN, chunkPosition);
                 self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
                 self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
                 self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 1, chunkPosition);
-                self.getChunkManager().addTicket(ChunkTicketType.UNKNOWN, chunkPosition, 4, chunkPosition);
-                self.getChunkManager().addTicket(ChunkTicketType.FORCED, chunkPosition, 4, chunkPosition);
-                self.getChunk(chunkPosition.x, chunkPosition.z);
-                self.getChunkManager().getChunk(chunkPosition.x, chunkPosition.z);
-                self.getChunkManager().getWorldChunk(chunkPosition.x, chunkPosition.z);
                 self.getChunkManager().chunkLoadingManager.acquire(chunkPosition.toLong());
-
-                for (ServerPlayerEntity player : self.getPlayers()) {
-                    chunkLoadingManager.sendWatchPackets(player);
-                    chunkLoadingManager.sendWatchPackets(player, ChunkFilter.cylindrical(chunkPosition, 1));
-                }
-
             }
-//            self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z);
         }
 
+        // Every second
+        if(self.getTime() % 3 == 0) {
+            for (Contraption contraption : contraptionManager.getContraptions().values()) {
+                for (ServerPlayerEntity player : self.getPlayers()) {
+                    chunkLoadingManager.sendWatchPackets(player, ChunkFilter.cylindrical(contraption.getPlot().getCenterChunkPos(), 4));
+//                    chunkLoadingManager.sendWatchPackets(player, new ChunkFilterPlot(contraption.getPlot()));
+                }
+            }
+        }
 
-//
-//        for (final ChunkHolder chunkHolder : chunkLoadingManagerAccessor.callEntryIterator()) {
-//            final Optional<WorldChunk> worldChunkOptional = chunkHolder.getTickingFuture().getNow(ChunkHolder.UNLOADED_WORLD_CHUNK).left();
-//            // Only load chunks that are present and that have tickets
-//            if (worldChunkOptional.isPresent() && ticketManager.getTickets().containsKey(chunkHolder.getPos().toLong())) {
-//                // Only load chunks that have a ticket
-//                final WorldChunk worldChunk = worldChunkOptional.get();
-//                crystal$loadChunk(worldChunk, voxelShapeUpdates);
-//            }
-//        }
-
-
-        // The commented code below is for unloading...
-        // I could give 2 fucks less about that rn tho sooooooo-
-        // ignore it
-
-//
-//        final Iterator<Map.Entry<ChunkPos, List<Vector3ic>>> knownChunkPosIterator = crystal$knownChunks.entrySet().iterator();
-//        while (knownChunkPosIterator.hasNext()) {
-//            final Map.Entry<ChunkPos, List<Vector3ic>> knownChunkPosEntry = knownChunkPosIterator.next();
-//            final long chunkPos = knownChunkPosEntry.getKey().toLong();
-//            // Unload chunks if they don't have tickets or if they're not in the visible chunks
-//            if ((!distanceManagerAccessor.getTickets().containsKey(chunkPos) || chunkMapAccessor.callGetVisibleChunkIfPresent(chunkPos) == null)) {
-//                final long ticksWaitingToUnload = crystal$chunksToUnload.getOrDefault(chunkPos, 0L);
-//                if (ticksWaitingToUnload > crystal$CHUNK_UNLOAD_THRESHOLD) {
-//                    // Unload this chunk
-//                    for (final Vector3ic unloadedChunk : knownChunkPosEntry.getValue()) {
-//                        final TerrainUpdate deleteVoxelShapeUpdate =
-//                                getVsCore().newDeleteTerrainUpdate(unloadedChunk.x(), unloadedChunk.y(), unloadedChunk.z());
-//                        voxelShapeUpdates.add(deleteVoxelShapeUpdate);
-//                    }
-//                    knownChunkPosIterator.remove();
-//                    crystal$chunksToUnload.remove(chunkPos);
-//                } else {
-//                    crystal$chunksToUnload.put(chunkPos, ticksWaitingToUnload + 1);
-//                }
-//            }
-//        }
-
-        // Tell the manager to disperse updates
-//        contraptionManager.applyPlotUpdates(voxelShapeUpdates);
     }
 
 
+    /**
+     * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
+     */
     @Unique
     private void crystal$loadChunk(@NotNull final Chunk worldChunk, final List<PlotUpdate> voxelShapeUpdates) {
         // Remove the chunk pos from crystal$chunksToUnload if its present
@@ -179,7 +143,7 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
                     voxelShapeUpdates.add(voxelShapeUpdate);
                 }
 //                else {
-//                    final PlotUpdate emptyVoxelShapeUpdate = getVsCore()
+//                    final PlotUpdate emptyVoxelShapeUpdate = vsCore()
 //                            .newEmptyVoxelShapeUpdate(chunkPos.x(), chunkPos.y(), chunkPos.z(), true);
 //                    voxelShapeUpdates.add(emptyVoxelShapeUpdate);
 //                }
@@ -188,6 +152,9 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
         }
     }
 
+    /**
+     * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
+     */
     @Unique
     public void crystal$removeChunk(final int chunkX, final int chunkZ) {
         final ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
@@ -195,3 +162,4 @@ public class ServerWorldMixin implements ContraptionManagerAccessor {
     }
 
 }
+

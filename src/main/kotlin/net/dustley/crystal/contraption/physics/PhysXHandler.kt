@@ -10,12 +10,12 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.Box
 import net.minecraft.world.World
 import physx.PxTopLevelFunctions
-import physx.common.*
+import physx.common.PxDefaultCpuDispatcher
+import physx.common.PxTolerancesScale
+import physx.common.PxVec3
 import physx.geometry.PxBoxGeometry
-import physx.geometry.PxGeometry
 import physx.physics.*
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class PhysXHandler(threads: Int = 4, val world: World) {
@@ -40,7 +40,7 @@ class PhysXHandler(threads: Int = 4, val world: World) {
 
         // create a physics scene
         val sceneDesc = PxSceneDesc(tolerances)
-        sceneDesc.gravity = PxVec3(0f, -9.8f, 0f)
+        sceneDesc.gravity = PxVec3(0f, -0f, 0f)
         sceneDesc.cpuDispatcher = dispatcher
         sceneDesc.filterShader = PxTopLevelFunctions.DefaultFilterShader()
         scene = physics.createScene(sceneDesc)
@@ -60,7 +60,7 @@ class PhysXHandler(threads: Int = 4, val world: World) {
     }
 
     fun createBoxActor(id: UUID,  pose: Transform,  aabb: Box): PxRigidDynamic {
-        val material = physics.createMaterial(.5f, .5f, .5f)
+        val material = physics.createMaterial(.5f, .5f, .02f)
         val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), material, true, shapeFlags)
         val body = physics.createRigidDynamic(pose.toPx())
         shape.simulationFilterData = filterData
