@@ -4,29 +4,22 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.dustley.accessor.ContraptionManagerAccessor;
 import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
-import net.dustley.crystal.scrapyard.chunk.PlotUpdate;
-import net.dustley.mixin.accessor.ServerChunkLoadingManagerAccessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.server.network.ChunkFilter;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.*;
+import net.minecraft.server.world.ServerChunkLoadingManager;
+import net.minecraft.server.world.ServerChunkManager;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.RandomSequencesState;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +29,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,79 +78,15 @@ public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
         final ServerWorld self = ServerWorld.class.cast(this);
         final ServerContraptionManager contraptionManager = crystal$getContraptionManager();
         final ServerChunkLoadingManager chunkLoadingManager = self.getChunkManager().chunkLoadingManager;
-        final ServerChunkLoadingManagerAccessor chunkLoadingManagerAccessor = (ServerChunkLoadingManagerAccessor) chunkLoadingManager;
 
         contraptionManager.tick();
 
-        // Create DenseVoxelShapeUpdate for new loaded chunks
-        // Also mark the chunks as loaded in the ship objects
-        final List<PlotUpdate> voxelShapeUpdates = new ArrayList<>();
-        final ChunkTicketManager ticketManager = (ChunkTicketManager) (chunkLoadingManager.getTicketManager());
-
         for (Contraption contraption : contraptionManager.getContraptions().values()) {
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-                self.getChunkManager().chunkLoadingManager.createLoader(ChunkStatus.FULL, chunkPosition);
                 self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-                self.getChunkManager().addTicket(ChunkTicketType.PLAYER, chunkPosition, 1, chunkPosition);
-                self.getChunkManager().chunkLoadingManager.acquire(chunkPosition.toLong());
             }
         }
 
-        // Every second
-        if(self.getTime() % 3 == 0) {
-            for (Contraption contraption : contraptionManager.getContraptions().values()) {
-                for (ServerPlayerEntity player : self.getPlayers()) {
-                    chunkLoadingManager.sendWatchPackets(player, ChunkFilter.cylindrical(contraption.getPlot().getCenterChunkPos(), 4));
-//                    chunkLoadingManager.sendWatchPackets(player, new ChunkFilterPlot(contraption.getPlot()));
-                }
-            }
-        }
-
-    }
-
-
-    /**
-     * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
-     */
-    @Unique
-    private void crystal$loadChunk(@NotNull final Chunk worldChunk, final List<PlotUpdate> voxelShapeUpdates) {
-        // Remove the chunk pos from crystal$chunksToUnload if its present
-        crystal$chunksToUnload.remove(worldChunk.getPos().toLong());
-        if (!crystal$knownChunks.containsKey(worldChunk.getPos())) {
-            final List<Vector3ic> voxelChunkPositions = new ArrayList<>();
-
-            final int chunkX = worldChunk.getPos().x;
-            final int chunkZ = worldChunk.getPos().z;
-
-            final ChunkSection[] chunkSections = worldChunk.getSectionArray();
-
-            for (int sectionY = 0; sectionY < chunkSections.length; sectionY++) {
-                final ChunkSection chunkSection = chunkSections[sectionY];
-                final Vector3ic chunkPos = new Vector3i(chunkX, worldChunk.sectionIndexToCoord(sectionY), chunkZ);
-                voxelChunkPositions.add(chunkPos);
-
-                if (chunkSection != null && !chunkSection.isEmpty()) {
-                    // Add this chunk to the ground rigid body
-                    final PlotUpdate voxelShapeUpdate = new PlotUpdate(chunkPos, sectionY, chunkSection);
-                    voxelShapeUpdates.add(voxelShapeUpdate);
-                }
-//                else {
-//                    final PlotUpdate emptyVoxelShapeUpdate = vsCore()
-//                            .newEmptyVoxelShapeUpdate(chunkPos.x(), chunkPos.y(), chunkPos.z(), true);
-//                    voxelShapeUpdates.add(emptyVoxelShapeUpdate);
-//                }
-            }
-            crystal$knownChunks.put(worldChunk.getPos(), voxelChunkPositions);
-        }
-    }
-
-    /**
-     * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
-     */
-    @Unique
-    public void crystal$removeChunk(final int chunkX, final int chunkZ) {
-        final ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-        crystal$knownChunks.remove(chunkPos);
     }
 
 }

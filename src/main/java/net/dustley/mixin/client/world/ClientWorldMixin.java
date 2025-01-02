@@ -55,13 +55,7 @@ public class ClientWorldMixin implements ContraptionManagerAccessor {
         for (Contraption contraption : contraptionManager.getContraptions().values()) {
             for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
                 self.getChunkManager().setChunkForced(chunkPosition, true);
-                self.getChunk(chunkPosition.x, chunkPosition.z);
-                self.getChunkManager().getChunk(chunkPosition.x, chunkPosition.z);
-                self.getChunkManager().getWorldChunk(chunkPosition.x, chunkPosition.z);
-//                self.getChunkManager().unload(new ChunkPos(0,1));
             }
-
-//            Crystal.INSTANCE.getLOGGER().info(String.valueOf(self.isChunkLoaded(contraption.getPlot().getCenterChunkPos().x, contraption.getPlot().getCenterChunkPos().z)));
         }
     }
 }

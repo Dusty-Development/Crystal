@@ -5,6 +5,7 @@
   "mixins": [
     "accessor.ChunkTicketManagerAccessor",
     "accessor.ServerChunkLoadingManagerAccessor",
+    "server.network.ChunkFilterCylindricalMixin",
     "server.network.ServerPlayNetworkHandlerMixin",
     "server.world.ServerChunkLoadingManagerEntityTrackerMixin",
     "server.world.ServerChunkLoadingManagerMixin",
