@@ -1,6 +1,5 @@
 package net.dustley.mixin.server.world;
 
-import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import net.dustley.accessor.ContraptionManagerAccessor;
 import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
@@ -9,7 +8,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldGenerationProgressListener;
-import net.minecraft.server.world.ServerChunkLoadingManager;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -20,7 +18,6 @@ import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3ic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,12 +26,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
+/**
+ * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
+ */
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
     @Shadow @Final private ServerChunkManager chunkManager;
@@ -60,24 +58,10 @@ public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
 
     public ServerContraptionManager crystal$getContraptionManager() { return contraptionManager; }
 
-
-    // Map from ChunkPos to the list of voxel chunks that chunk owns
-    @Unique
-    private final Map<ChunkPos, List<Vector3ic>> crystal$knownChunks = new HashMap<>();
-
-    // Maps chunk pos to number of ticks we have considered unloading the chunk
-    @Unique
-    private final Long2LongOpenHashMap crystal$chunksToUnload = new Long2LongOpenHashMap();
-
-    // How many ticks we wait before unloading a chunk
-    @Unique
-    private static final long crystal$CHUNK_UNLOAD_WAIT = 100;
-
     @Inject(method = "tick", at = @At("HEAD"))
     private void preTick(final BooleanSupplier shouldKeepTicking, final CallbackInfo ci) {
         final ServerWorld self = ServerWorld.class.cast(this);
         final ServerContraptionManager contraptionManager = crystal$getContraptionManager();
-        final ServerChunkLoadingManager chunkLoadingManager = self.getChunkManager().chunkLoadingManager;
 
         contraptionManager.tick();
 
