@@ -9,7 +9,6 @@ import java.util.*
 
 class ClientContraption(uuid: UUID, transform: Transform, plot: ScrapyardPlot, contraptionManager: ClientContraptionManager) : Contraption(uuid, transform, plot, contraptionManager) {
 
-    var mesh = null
 
     fun render(context: WorldRenderContext, renderSystem: ContraptionRenderSystem) {
         val stack = context.matrixStack() ?: return

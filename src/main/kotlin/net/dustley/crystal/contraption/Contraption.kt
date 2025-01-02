@@ -15,6 +15,10 @@ abstract class Contraption(
 
     init {
         Crystal.LOGGER.info("Created new contraption at: ${transform.position} with id: $uuid")
+
+        plot.controlledChunkPositions.forEach {
+            contraptionManager.world.chunkManager.setChunkForced(it, true)
+        }
     }
 
     /**
@@ -31,6 +35,12 @@ abstract class Contraption(
         //TODO: remove this if it's unnecesart
 
         // ^ its for applying forces
+    }
+
+    fun unload() {
+        plot.controlledChunkPositions.forEach {
+            contraptionManager.world.chunkManager.setChunkForced(it, false)
+        }
     }
 
 }

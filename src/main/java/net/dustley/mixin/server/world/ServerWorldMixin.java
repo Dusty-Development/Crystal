@@ -1,7 +1,6 @@
 package net.dustley.mixin.server.world;
 
 import net.dustley.accessor.ContraptionManagerAccessor;
-import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
@@ -12,7 +11,6 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
@@ -65,11 +63,11 @@ public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
 
         contraptionManager.tick();
 
-        for (Contraption contraption : contraptionManager.getContraptions().values()) {
-            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-            }
-        }
+//        for (Contraption contraption : contraptionManager.getContraptions().values()) {
+//            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
+//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
+//            }
+//        }
 
     }
 
