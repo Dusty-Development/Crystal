@@ -72,7 +72,7 @@ class TerrainGeometryCallback(val world: World, val chunks: List<Chunk>)
                 return 1
             }
         }
-        return 0
+        throw NullPointerException()
     }
 
     override fun generateContactsImpl( //TODO

@@ -89,8 +89,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
 
             stack.push() // Push into the Section
 
-            val sectionYBottom = -10
-            val sectionYTop = 10
+            val sectionYBottom = world.bottomY
+            val sectionYTop = world.topY
 
             val minBlockPos = chunkPos.getBlockPos(0,0,0).withY(sectionYBottom)
             val maxBlockPos = chunkPos.getBlockPos(15,0,15).withY(sectionYTop)

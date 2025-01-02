@@ -73,7 +73,7 @@ class ContraptionGeometryCallback(val contraption: Contraption)
                 return 1
             }
         }
-        return 0
+        throw NullPointerException()
     }
 
     override fun generateContactsImpl( //TODO

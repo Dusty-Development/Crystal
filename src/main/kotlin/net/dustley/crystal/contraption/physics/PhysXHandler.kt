@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.Heightmap
 import net.minecraft.world.World
 import net.minecraft.world.chunk.ChunkStatus
+import org.joml.Vector3d
 import physx.PxTopLevelFunctions
 import physx.common.*
 import physx.geometry.PxBoxGeometry
@@ -29,7 +30,7 @@ class PhysXHandler(threads: Int = 4, val world: World) {
     var scene : PxScene
 
     val actorData : HashMap<UUID,ActorData> = hashMapOf()
-    data class ActorData(val actor : PxRigidDynamic, val shape : PxShape, val material : PxMaterial)
+    data class ActorData(val offset: Vector3d, val actor : PxRigidDynamic, val shape : PxShape, val material : PxMaterial)
 
     private var terrainData : HashMap<PlayerEntity, TerrainData> = hashMapOf()
     data class TerrainData(val geometry : TerrainGeometryCallback, var shape : PxShape, val actor : PxRigidStatic)
@@ -72,13 +73,14 @@ class PhysXHandler(threads: Int = 4, val world: World) {
                 }
             }
         }
+        contraption.transform.position = contraption.transform.position.add(min.toJOMLD())
         val body = physics.createRigidDynamic(contraption.transform.toPx())
         val aabb = Box(min.withY(-64).toDoubles(), max.withY(maxH.toInt()).toDoubles().add(Vec3d(1.0,1.0,1.0)))
         val shape = physics.createShape(PxBoxGeometry(aabb.lengthX.toFloat(), aabb.lengthY.toFloat(), aabb.lengthZ.toFloat()), material)
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actorData[contraption.uuid] = ActorData(body, shape, material)
+        actorData[contraption.uuid] = ActorData(min.toJOMLD(), body, shape, material)
         return body
     }
 
@@ -89,7 +91,7 @@ class PhysXHandler(threads: Int = 4, val world: World) {
         shape.simulationFilterData = filterData
         body.attachShape(shape)
         scene.addActor(body)
-        actorData[id] = ActorData(body, shape, material)
+        actorData[id] = ActorData(Vector3d(0.0, 0.0, 0.0),body, shape, material)
         return body
     }
 

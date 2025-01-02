@@ -15,7 +15,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 data class Transform (
-    val position: Vector3d = Vector3d(),
+    var position: Vector3d = Vector3d(),
     val scale: Double = 1.0,
     val rotation: Quaterniond = Quaterniond()
 ) {
