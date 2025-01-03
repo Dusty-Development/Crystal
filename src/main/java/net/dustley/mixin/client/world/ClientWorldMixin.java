@@ -1,6 +1,7 @@
 package net.dustley.mixin.client.world;
 
 import net.dustley.accessor.ContraptionManagerAccessor;
+import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.client.ClientContraptionManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;
@@ -50,10 +51,8 @@ public class ClientWorldMixin implements ContraptionManagerAccessor {
 
         contraptionManager.tick();
 
-//        for (Contraption contraption : contraptionManager.getContraptions().values()) {
-//            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-//                self.getChunkManager().setChunkForced(chunkPosition, true);
-//            }
-//        }
+        for (Contraption contraption : contraptionManager.getContraptions().values()) {
+            contraption.loadChunks(self);
+        }
     }
 }

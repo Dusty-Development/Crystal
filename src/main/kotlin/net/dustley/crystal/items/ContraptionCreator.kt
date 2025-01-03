@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec3i
 import org.joml.Quaterniond
 import org.joml.Vector3d
 
@@ -25,7 +26,7 @@ class ContraptionCreator : Item(Settings().maxCount(1)) {
             val contraption = world.contraptionManager().createAndAddContraption(transform)
 
             val pos = contraption.plot.centerPos.toMinecraft()
-            world.setBlockState(BlockPos.ofFloored(pos).withY(0), context.world.getBlockState(context.blockPos))
+            world.setBlockState(BlockPos.ofFloored(pos).withY(0).subtract(Vec3i(1,1,1)), context.world.getBlockState(context.blockPos))
         }
 
         return super.useOnBlock(context)

@@ -18,6 +18,7 @@
     "client.render.GameRendererMixin",
     "client.render.WorldRendererMixin",
     "client.world.ClientChunkManagerMixin",
+    "client.world.ClientChunkMapMixin",
     "client.world.ClientWorldMixin"
   ],
   "injectors": {

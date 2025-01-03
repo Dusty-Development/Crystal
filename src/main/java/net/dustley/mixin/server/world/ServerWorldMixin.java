@@ -1,6 +1,7 @@
 package net.dustley.mixin.server.world;
 
 import net.dustley.accessor.ContraptionManagerAccessor;
+import net.dustley.crystal.contraption.Contraption;
 import net.dustley.crystal.contraption.server.ServerContraptionManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
@@ -11,6 +12,7 @@ import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.level.ServerWorldProperties;
@@ -38,6 +40,10 @@ public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
 
     @Shadow public abstract void playSound(@Nullable PlayerEntity source, double x, double y, double z, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed);
 
+    @Shadow public abstract boolean setChunkForced(int x, int z, boolean forced);
+
+    @Shadow public abstract boolean shouldTick(BlockPos pos);
+
     @Unique private ServerContraptionManager contraptionManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -63,11 +69,9 @@ public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
 
         contraptionManager.tick();
 
-//        for (Contraption contraption : contraptionManager.getContraptions().values()) {
-//            for (ChunkPos chunkPosition : contraption.getPlot().getControlledChunkPositions()) {
-//                self.setChunkForced(chunkPosition.x, chunkPosition.z, true);
-//            }
-//        }
+        for (Contraption contraption : contraptionManager.getContraptions().values()) {
+            contraption.loadChunks(self);
+        }
 
     }
 

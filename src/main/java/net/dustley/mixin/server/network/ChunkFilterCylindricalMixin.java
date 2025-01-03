@@ -15,6 +15,8 @@ public class ChunkFilterCylindricalMixin {
     private void distanceCheck(int x, int z, boolean includeEdge, CallbackInfoReturnable<Boolean> cir) {
         ChunkPos centerPos = new ChunkPos(x, z);
 
+        // TODO: might be better as a check if the origin is in the scrapyard, if so move it back and check for other chunks too
+        // Just in case players or loaders are on ships
         if(ScrapyardPlotManager.Companion.isChunkInScrapyard(centerPos)) {
             cir.setReturnValue(true);
             cir.cancel();

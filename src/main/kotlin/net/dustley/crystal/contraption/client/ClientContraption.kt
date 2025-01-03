@@ -22,8 +22,7 @@ class ClientContraption(uuid: UUID, transform: Transform, plot: ScrapyardPlot, c
         val scale = transform.scale.toFloat()
         stack.scale(scale, scale,  scale)
 
-        renderSystem.renderChunks(this, stack, context)
-        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderSystem. renderDebug(this, stack, context)
+        // ADDITIONAL STUFF HERE
 
         stack.pop()
     }

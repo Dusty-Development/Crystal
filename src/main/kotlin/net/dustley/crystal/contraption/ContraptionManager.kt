@@ -71,7 +71,9 @@ abstract class ContraptionManager(val world: World) {
      * Sets up the physics of a new contraption
      */
     fun setupContraptionPhys(contraption: Contraption) {
-
+        handler.createBoxActor(contraption.uuid, contraption.transform, Box(0.0, 0.0, 0.0, .5, .5, .5)
+            //contraption.plot.chunkManager.aabb
+        )
     }
 
     open fun postUpdate(deltaTime: Double, context: WorldRenderContext) {}
