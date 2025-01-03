@@ -55,8 +55,8 @@ class ContraptionRenderSystem(val world: ClientWorld) {
         stack.scale(contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat(), contraption.transform.scale.toFloat())
 
         renderChunks(contraption, stack, context)
-        renderDebug(contraption, stack, context, false)
-//        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context, true)
+//        renderDebug(contraption, stack, context, false)
+        if(context.gameRenderer().client.debugHud.shouldShowDebugHud()) renderDebug(contraption, stack, context, true)
 
         stack.pop()
     }

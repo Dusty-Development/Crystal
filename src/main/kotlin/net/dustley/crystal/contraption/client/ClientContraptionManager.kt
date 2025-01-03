@@ -21,8 +21,8 @@ class ClientContraptionManager(val clientWorld: ClientWorld) : ContraptionManage
         val contraption = ClientContraption(id, transform, plot, this)
         addContraption(id, contraption)
 
-        setupContraptionPhys(contraption)
-//        handler.createActor(contraption)
+//        setupContraptionPhys(contraption)
+        handler.createActor(contraption)
 
         clientWorld.players.forEach{
             it.sendMessage(Text.literal(world.contraptionManager().handler.actorData.size.toString()))
