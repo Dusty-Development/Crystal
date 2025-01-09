@@ -49,6 +49,7 @@ abstract class Contraption(
             }
 
             if(world is ClientWorld) {
+                world.chunkManager.setChunkForced(pos, true)
             }
         }
     }
