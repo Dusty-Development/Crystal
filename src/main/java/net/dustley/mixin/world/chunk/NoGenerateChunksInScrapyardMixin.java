@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(ChunkGenerator.class)
-public class ChunkGeneratorMixin {
+public class NoGenerateChunksInScrapyardMixin {
 
     // TODO its pretty standard to extend this class, if they do super.whatever, these mixins will not work correctly
     // tfc in forge part of the mod has a bandaid solution, if this is fixed please remove that

@@ -40,7 +40,6 @@ abstract class Contraption(
         // ^ its for applying forces
     }
 
-
     fun loadChunks(world: World) {
         plot.controlledChunkPositions.forEach { pos ->
 //            world.chunkManager.getChunk(pos.x, pos.z)
@@ -56,7 +55,7 @@ abstract class Contraption(
 
     fun unload() {
         plot.controlledChunkPositions.forEach {
-//            contraptionManager.world.chunkManager.setChunkForced(it, false)
+            contraptionManager.world.chunkManager.setChunkForced(it, false)
         }
     }
 

@@ -7,19 +7,21 @@
     "accessor.ServerChunkLoadingManagerAccessor",
     "server.network.ChunkFilterCylindricalMixin",
     "server.network.ServerPlayNetworkHandlerMixin",
+    "server.world.HandleCrystalServerMixin",
     "server.world.ServerChunkLoadingManagerEntityTrackerMixin",
     "server.world.ServerChunkLoadingManagerMixin",
-    "server.world.ServerWorldMixin",
-    "world.chunk.ChunkGeneratorMixin",
-    "world.worldgen.FlatChunkGeneratorMixin",
-    "world.worldgen.NoiseChunkGeneratorMixin"
+    "world.chunk.NoGenerateChunksInScrapyardMixin",
+    "world.worldgen.FlatNoGenerateChunksInScrapyardMixin",
+    "world.worldgen.NoiseNoGenerateChunksInScrapyardMixin"
   ],
   "client": [
     "client.render.GameRendererMixin",
     "client.render.WorldRendererMixin",
+    "client.render.vanilla.AddViewAreaForContraptionsMixin",
+    "client.render.vanilla.RenderContraptionChunksMixin",
+    "client.world.ChunkMapSkipScrapyardMixin",
     "client.world.ClientChunkManagerMixin",
-    "client.world.ClientChunkMapMixin",
-    "client.world.ClientWorldMixin"
+    "client.world.HandleCrystalClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

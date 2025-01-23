@@ -21,7 +21,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 @Mixin(ClientWorld.class)
-public class ClientWorldMixin implements ContraptionManagerAccessor {
+public class HandleCrystalClientMixin implements ContraptionManagerAccessor {
     @Shadow @Final private ClientChunkManager chunkManager;
     @Unique private ClientContraptionManager contraptionManager;
 

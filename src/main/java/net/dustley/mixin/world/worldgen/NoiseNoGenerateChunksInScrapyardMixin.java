@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
  * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(NoiseChunkGenerator.class)
-public class NoiseChunkGeneratorMixin {
+public class NoiseNoGenerateChunksInScrapyardMixin {
 
     @Shadow
     @Final

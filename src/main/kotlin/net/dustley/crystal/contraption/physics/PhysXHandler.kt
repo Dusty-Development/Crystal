@@ -3,7 +3,10 @@ package net.dustley.crystal.contraption.physics
 import net.dustley.crystal.Crystal.LOGGER
 import net.dustley.crystal.Crystal.foundation
 import net.dustley.crystal.Crystal.version
-import net.dustley.crystal.api.math.*
+import net.dustley.crystal.api.math.Transform
+import net.dustley.crystal.api.math.toCrystal
+import net.dustley.crystal.api.math.toDoubles
+import net.dustley.crystal.api.math.toJOMLD
 import net.dustley.crystal.contraption.Contraption
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.BlockPos
@@ -14,17 +17,17 @@ import net.minecraft.world.World
 import net.minecraft.world.chunk.ChunkStatus
 import org.joml.Vector3d
 import physx.PxTopLevelFunctions
-import physx.common.*
+import physx.common.PxDefaultCpuDispatcher
+import physx.common.PxTolerancesScale
+import physx.common.PxVec3
 import physx.geometry.PxBoxGeometry
-import physx.geometry.PxCustomGeometry
-import physx.geometry.PxGeometryQuery
 import physx.physics.*
 import java.util.*
-import kotlin.collections.HashMap
+import kotlin.collections.set
 import kotlin.math.max
 
 
-class PhysXHandler(threads: Int = 4, val world: World) {
+class PhysXHandler(threads: Int = 6, val world: World) {
     private var dispatcher : PxDefaultCpuDispatcher
     private var physics : PxPhysics
     var scene : PxScene

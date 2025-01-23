@@ -34,7 +34,7 @@ import java.util.function.BooleanSupplier;
  * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin implements ContraptionManagerAccessor {
+public abstract class HandleCrystalServerMixin implements ContraptionManagerAccessor {
     @Shadow @Final private ServerChunkManager chunkManager;
     @Shadow @Final private MinecraftServer server;
 

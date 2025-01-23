@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientChunkManager.ClientChunkMap.class)
-public class ClientChunkMapMixin {
+public class ChunkMapSkipScrapyardMixin {
 
     @Inject(method = "isInRadius", at = @At("HEAD"), cancellable = true)
     private void radiusCheck(int chunkX, int chunkZ, CallbackInfoReturnable<Boolean> cir) {

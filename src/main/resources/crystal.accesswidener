@@ -6,3 +6,4 @@ accessible class net/minecraft/server/world/ServerChunkLoadingManager$EntityTrac
 accessible method net/minecraft/client/world/ClientChunkManager$ClientChunkMap isInRadius (II)Z
 accessible method net/minecraft/server/world/ServerChunkLoadingManager sendWatchPackets (Lnet/minecraft/server/network/ServerPlayerEntity;)V
 accessible method net/minecraft/server/world/ServerChunkLoadingManager sendWatchPackets (Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ChunkFilter;)V
+accessible method net/minecraft/client/render/BuiltChunkStorage getRenderedChunk (Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk;

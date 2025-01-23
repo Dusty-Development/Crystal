@@ -21,7 +21,7 @@ class ContraptionCreator : Item(Settings().maxCount(1)) {
         val transform = Transform(Vector3d(context.hitPos.x, context.hitPos.y + 0.5, context.hitPos.z), 1.0, Quaterniond())
 
         if(world is ServerWorld) {
-            context.player?.sendMessage(Text.literal("Creating ship!"))
+            context.player?.sendMessage(Text.literal("Creating Contraption!"))
 
             val contraption = world.contraptionManager().createAndAddContraption(transform)
 

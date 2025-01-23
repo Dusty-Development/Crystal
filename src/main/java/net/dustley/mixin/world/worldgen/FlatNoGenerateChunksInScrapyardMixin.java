@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * <p> (thanks to "Valkyrien Skies 2" for creating the original code)
  */
 @Mixin(FlatChunkGenerator.class)
-public class FlatChunkGeneratorMixin {
+public class FlatNoGenerateChunksInScrapyardMixin {
     @Inject(method = "populateNoise", at = @At("HEAD"), cancellable = true)
     private void preFillFromNoise(Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk, CallbackInfoReturnable<CompletableFuture<Chunk>> cir) {
         final ChunkPos chunkPos = chunk.getPos();
